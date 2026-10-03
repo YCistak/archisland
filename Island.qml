@@ -164,24 +164,6 @@ Item {
     else view = "controls"
   }
 
-  // ---------- Göz atma: fareyle üzerine gelince saat ----------
-  // Fare island'ın (ya da göz atarken eski hap alanının) üstündeyken kısa
-  // gecikmeyle ana etkinlik kabarcığa iner ve saat görünür; fare çıkınca
-  // gecikmeyle geri döner. IPC `peek on|off` aynı işlevi çağırır.
-  property real gozGenislik: 0
-  function gozAt(ac) {
-    if (ac) gozGenislik = Math.max(100, islandGenislik)
-    live.goz = ac
-  }
-  property real islandGenislik: 0
-  property bool islandUzerinde: false
-  onIslandUzerindeChanged: gozZamanlayici.restart()
-  Timer {
-    id: gozZamanlayici
-    interval: 250
-    onTriggered: root.gozAt(root.islandUzerinde && root.view === "rest")
-  }
-
   // ---------- Workspace switches ----------
 
   // ArchIsland's bar's workspaces: 1–5 always, and any other up to 10 that
@@ -343,7 +325,6 @@ Item {
       yuzeyKapanisTimer.restart()
     }
     oncekiGorunum = view
-    if (view !== "rest") live.goz = false
     if (view === "rest" && updateAnnouncePending) Qt.callLater(announceUpdate)
     surfaceContentReady = false
     if (surfaceOpenFor(view)) surfaceRevealTimer.restart()
@@ -510,12 +491,6 @@ Item {
       root.islandClick(button === "right")
       return root.view
     }
-    // Fareyle üzerine gelince saat (göz atma): "on" ya da "off".
-    function peek(state: string): string {
-      if (state !== "on" && state !== "off") return "hata: on|off"
-      root.gozAt(state === "on")
-      return root.live.gozEtkin ? "goz" : "normal"
-    }
     // Kota uyarısını kapat (uyarıya tıklamakla aynı işlev).
     function dismiss(): string {
       var vardi = !!root.aiQuota.alarm
@@ -569,9 +544,6 @@ Item {
           Region { item: window.kabarcik(2) }
           Region { item: window.kabarcik(3) }
           Region { item: window.kabarcik(4) }
-          // Göz atarken eski hap alanı da fareyi izler (island küçülünce
-          // fare dışarıda kalıp gidip gelme titremesi olmasın).
-          Region { item: gozAlani }
         }
         MouseArea {
           id: outsideArea
@@ -626,17 +598,6 @@ Item {
           }
         }
 
-        Item {
-          id: gozAlani
-          x: island.x + island.width / 2 - width / 2
-          y: island.y
-          width: root.live.gozEtkin ? Math.max(root.gozGenislik, island.width) : 0
-          height: island.height
-          HoverHandler { id: gozHover; enabled: root.live.gozEtkin }
-        }
-        Binding { target: root; property: "islandUzerinde"; value: clockHover.hovered || gozHover.hovered }
-        Binding { target: root; property: "islandGenislik"; value: island.animatedWidth }
-
         Rectangle {
           id: island
           x: (parent.width - width) / 2
@@ -657,9 +618,11 @@ Item {
             : root.downloadDone ? 360
             : root.downloadActive ? (root.downloads.active ? 240 : 280)
             : root.mediaPill ? 240
-            : root.agentPill ? 280
+            // Ajan ve takvim haplarında sağdaki saat için ölçülü ek genişlik
+            // (onay beklerken saat yok; bkz. PillClock).
+            : root.agentPill ? (root.agents.bekleyenVar ? 280 : 320)
             : root.quotaPill ? 250
-            : root.eventPill ? 300
+            : root.eventPill ? 340
             : 100
           readonly property real targetHeight: activeSurface ? activeSurface.islandHeight
             : root.notificationPill ? 84

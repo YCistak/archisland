@@ -94,23 +94,11 @@ QtObject {
   }
   // Sabitleme olmasaydı ana island'da olacak etkinlik.
   readonly property var otomatikAna: etkinler.length ? etkinler[0] : null
-  // Sabitleme ve önceliğe göre ana island'da olması gereken etkinlik
-  // (göz atma sırasında bile; bkz. goz).
-  readonly property var gercekAna: {
+  // Sabitleme ve önceliğe göre ana island'daki etkinlik.
+  readonly property var anaEtkinlik: {
     if (sabit !== "" && !ezen && aktifMi(sabit)) return etkinlik(sabit)
     return otomatikAna
   }
-
-  // ---------- Göz atma (fareyle üzerine gelince saat) ----------
-  // Geçici: ana etkinlik kabarcığa iner, island ortasında dinlenme hâlindeki
-  // saat görünür. Sabitlemeyi (`sabit`) değiştirmez, kalıcı durum yaratmaz.
-  // Dikkat isteyen etkinliklerde (kota uyarısı, onay bekliyor) ve kabarcığı
-  // olmayanlarda (kurulum, indirme) göz atılmaz; onlar ortada kalır.
-  property bool goz: false
-  readonly property bool gozMumkun: dinlenme && !!gercekAna && gercekAna.kucuk && gercekAna.id !== "ajanOnay"
-  readonly property bool gozEtkin: goz && gozMumkun
-  // Ana island'daki etkinlik; göz atarken yok (saat görünür).
-  readonly property var anaEtkinlik: gozEtkin ? null : gercekAna
   readonly property string ana: anaEtkinlik ? anaEtkinlik.id : ""
 
   // Sabitlenen etkinlik bitince (koşulu kalkınca) otomatik önceliğe dön.
@@ -127,18 +115,10 @@ QtObject {
   // kabarcık (1. sağda, 2. solda); kullanıcı sırası önce, kalanlar öncelik sırasıyla.
   readonly property int enFazlaKabarcik: 2
   readonly property var kucukler: {
-    var gId = gercekAna ? gercekAna.id : ""
-    var adaylar = etkinler.filter(function(e) { return e.kucuk && e.id !== gId }).map(function(e) { return e.id })
+    var adaylar = etkinler.filter(function(e) { return e.kucuk && e.id !== ana }).map(function(e) { return e.id })
     var r = kabarcikSirasi.filter(function(k) { return adaylar.indexOf(k) >= 0 })
     for (var i = 0; i < adaylar.length; i++) if (r.indexOf(adaylar[i]) < 0) r.push(adaylar[i])
-    r = r.slice(0, enFazlaKabarcik)
-    // Göz atarken ana etkinlik de kabarcığa iner: boş yer yoksa en düşük
-    // öncelikli kabarcık göz atma süresince gizlenir.
-    if (gozEtkin) {
-      if (r.length < enFazlaKabarcik) r.push(gId)
-      else r[enFazlaKabarcik - 1] = gId
-    }
-    return r
+    return r.slice(0, enFazlaKabarcik)
   }
 
   // Kabarcık ile ana island'ın yerini değiştir: `hedef` kabarcık kimliği ya
@@ -151,8 +131,7 @@ QtObject {
     var sira = /^[0-9]+$/.test(hedef) ? Number(hedef) : k.indexOf(hedef)
     if (sira < 0 || sira >= k.length) return "hata: kabarcık yok (" + k.join(",") + ")"
     var yeni = k[sira]
-    var eski = gercekAna ? gercekAna.id : ""
-    goz = false
+    var eski = ana
     var sirali = k.slice()
     if (eski !== "" && etkinlik(eski) && etkinlik(eski).kucuk) sirali[sira] = eski
     else sirali.splice(sira, 1)

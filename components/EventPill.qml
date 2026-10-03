@@ -2,7 +2,8 @@ import QtQuick
 
 // Dinlenme hâlinde "sıradaki etkinlik": bir saat içinde başlayacak takvim
 // etkinliği varsa island küçük bir canlı etkinliğe dönüşür. Tıklayınca
-// takvim görünümü açılır (bkz. Island.qml).
+// takvim görünümü açılır (bkz. Island.qml). Sağ kenarda küçük, soluk saat
+// durur; yer darsa etkinlik adı kısalır.
 LivePill {
   id: pill
   shown: host.eventPill
@@ -40,8 +41,8 @@ LivePill {
   }
   Text {
     id: remaining
-    anchors.right: parent.right
-    anchors.rightMargin: 16
+    anchors.right: saat.left
+    anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
     text: !pill.event ? "" : pill.event.minutes <= 0 ? "şimdi" : pill.event.minutes + " dk"
     color: pill.host.theme.accent
@@ -49,5 +50,12 @@ LivePill {
     font.pixelSize: 13
     font.weight: Font.DemiBold
     font.features: { "tnum": 1 }
+  }
+  PillClock {
+    id: saat
+    host: pill.host
+    anchors.right: parent.right
+    anchors.rightMargin: 16
+    anchors.verticalCenter: parent.verticalCenter
   }
 }

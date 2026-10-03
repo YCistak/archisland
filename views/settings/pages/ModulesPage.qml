@@ -71,13 +71,13 @@ ColumnLayout {
     }
   }
 
-  // Island'a tıklama ve üzerine gelme düzeni (kısa kullanım notu).
+  // Island'a tıklama düzeni ve saatin yeri (kısa kullanım notu).
   SettingsGroup {
     view: page.view
     title: "Kullanım"
     SettingsRow { view: page.view; label: "Sol tık"; detail: "Island'ın kendisi: kontrol merkezi (kota uyarısında uyarıyı kapatır)" }
     SettingsRow { view: page.view; label: "Sağ tık"; detail: "Ana etkinliğin detayı (ajan/kota: limitler, müzik: oynatıcı); etkinlik yoksa takvim" }
-    SettingsRow { view: page.view; label: "Üzerine gelme"; detail: "Saati geçici gösterir, etkinlik kabarcığa iner; çıkınca geri döner" }
+    SettingsRow { view: page.view; label: "Saat"; detail: "Saat, etkinlik varken island'ın sağında görünür" }
     SettingsRow { view: page.view; label: "Kabarcığa tık"; detail: "Etkinliği ana island'a alır (sabitler)"; last: true }
   }
 

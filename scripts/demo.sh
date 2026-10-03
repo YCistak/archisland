@@ -20,7 +20,6 @@ Kullanım: island demo [senaryo]
 Senaryolar:
   ajan       Ajan çalışıyor → 2 ajan → onay bekliyor → bitti (limit kartı)
   baloncuk   İki ajan: ana island + baloncuk, ardından yer değiştirme (swap)
-  goz        Göz atma: ajan çalışırken saat belirir ve kaybolur (peek)
   tiklama    Sol tık (kontrol merkezi) ve sağ tık (etkinlik detayı)
   kota       Kota uyarısı: süre dolunca kapanır, tıklayınca kapanır
   masaustu   Pencereli masaüstleri ve boş bir masaüstü arasında geçiş
@@ -69,7 +68,6 @@ kotayi_geri_yukle() {
 temizle() {
   trap - INT TERM EXIT
   ada dismiss
-  ada peek off
   ajanlari_temizle
   ada close
   kotayi_geri_yukle
@@ -96,13 +94,6 @@ s_baloncuk() {
   adim "Antigravity de çalışıyor (iki baloncuk)…"; ada agent agy working demo-2; bekle 4
   adim "Baloncuk 0 ile yer değiştir…"; ada swap 0; bekle 4
   adim "Baloncuk 1 ile yer değiştir…"; ada swap 1; bekle 4
-  adim "Temizleniyor…"; ajanlari_temizle; bekle 2
-}
-
-s_goz() {
-  adim "Claude çalışıyor…"; ada agent claude working demo-1; bekle 3
-  adim "Göz atma açık (saat görünür)…"; ada peek on; bekle 4
-  adim "Göz atma kapalı…"; ada peek off; bekle 3
   adim "Temizleniyor…"; ajanlari_temizle; bekle 2
 }
 
@@ -150,12 +141,12 @@ s_masaustu() {
   hyprctl dispatch "hl.dsp.focus({ workspace = $BASLANGIC_MD })" >/dev/null 2>&1; bekle 2
 }
 
-s_hepsi() { s_ajan; s_baloncuk; s_goz; s_tiklama; s_kota; s_masaustu; }
+s_hepsi() { s_ajan; s_baloncuk; s_tiklama; s_kota; s_masaustu; }
 
 # --- Giriş ------------------------------------------------------------------
 case "${1:-}" in
   "" | -h | --help | yardim) kullanim ;;
-  ajan | baloncuk | goz | tiklama | kota | masaustu | hepsi)
+  ajan | baloncuk | tiklama | kota | masaustu | hepsi)
     command -v hyprctl >/dev/null && BASLANGIC_MD="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty')"
     "s_$1"
     ;;

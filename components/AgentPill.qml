@@ -3,7 +3,9 @@ import QtQuick
 // Kodlama ajanı canlı etkinliği (aiAgents modülü): bir ya da birden çok ajan
 // çalışırken island'ın ana hapı. Solda dönen Siri noktaları (onay
 // bekleniyorsa uyarı simgesi), ortada "Claude çalışıyor" / "2 ajan
-// çalışıyor" / "Claude onay bekliyor".
+// çalışıyor" / "Claude onay bekliyor". Çalışırken sağ kenarda küçük, soluk
+// saat durur (onay beklerken dikkat dağılmasın diye gösterilmez); yer darsa
+// özet metni kısalır, saat kalır.
 LivePill {
   id: pill
   shown: host.agentPill
@@ -53,10 +55,18 @@ LivePill {
   // Ajanın rengi (birden çok tür ajan varsa nötr).
   Rectangle {
     id: dot
-    anchors.right: parent.right
-    anchors.rightMargin: 16
+    anchors.right: saat.visible ? saat.left : parent.right
+    anchors.rightMargin: saat.visible ? 10 : 16
     anchors.verticalCenter: parent.verticalCenter
     width: 8; height: 8; radius: 4
     color: pill.bekliyor ? pill.host.theme.urgent : pill.host.agents.ozetRenk
+  }
+  PillClock {
+    id: saat
+    host: pill.host
+    visible: !pill.bekliyor
+    anchors.right: parent.right
+    anchors.rightMargin: 16
+    anchors.verticalCenter: parent.verticalCenter
   }
 }
