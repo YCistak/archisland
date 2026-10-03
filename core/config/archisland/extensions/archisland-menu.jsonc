@@ -36,6 +36,7 @@
   "setup.input": {"icon":"","label":"Input","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
 
   // Trigger / Toggle gizlemeleri
+  "trigger.emoji": {"when": "false"},
   "trigger.toggle.screensaver": {"when": "false"},
   "trigger.toggle.animations": {"when": "false"},
   "trigger.toggle.top-bar": {"when": "false"},
