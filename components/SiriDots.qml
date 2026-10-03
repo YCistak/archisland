@@ -1,84 +1,46 @@
 import QtQuick
 
 // Kodlama ajanı / AI düşünme göstergesi:
-// Dönen (spinning) animasyon yerine sakin, nefes alan, yumuşak ışık dalgası yayan
-// organik Claude / AI kıvılcımı ve parıltı aurası.
+// Çizgilerden oluşan dönen daire (Apple iOS / macOS radyal çizgili spinner).
 Item {
   id: dots
   property bool running: true
-  property color dotColor: "#d97757"
-  property string glyph: ""
-  implicitWidth: 36
-  implicitHeight: 36
+  property color dotColor: "#ffffff"
+  implicitWidth: 26
+  implicitHeight: 26
 
-  // 1. Sakin nefes alma nabzı (Breathing pulse): 0 -> 1 -> 0
-  property real breath: 0
-  SequentialAnimation on breath {
-    loops: Animation.Infinite
-    running: dots.running && dots.visible
-    NumberAnimation {
-      from: 0; to: 1
-      duration: 1400
-      easing.type: Easing.InOutSine
+  Item {
+    id: wheel
+    anchors.fill: parent
+
+    // Akıcı ve sürekli 360 derece dönüş
+    RotationAnimation on rotation {
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      running: dots.running && dots.visible
     }
-    NumberAnimation {
-      from: 1; to: 0
-      duration: 1400
-      easing.type: Easing.InOutSine
+
+    Repeater {
+      model: 12
+      delegate: Item {
+        id: spoke
+        required property int index
+        anchors.fill: parent
+        rotation: index * 30
+
+        Rectangle {
+          anchors.horizontalCenter: parent.horizontalCenter
+          y: 2
+          width: 2.2
+          height: 5.8
+          radius: 1.1
+          color: dots.dotColor
+          // Kuyruğa doğru azalan opaklık (0: 1.0, 11: 0.12)
+          opacity: Math.max(0.12, 1.0 - (index / 12.0) * 0.88)
+        }
+      }
     }
-  }
-
-  // 2. Dışa yayılan yumuşak ışık dalgası (Radiant ripple): 0 -> 1
-  property real ripple: 0
-  NumberAnimation on ripple {
-    from: 0; to: 1
-    duration: 2400
-    loops: Animation.Infinite
-    running: dots.running && dots.visible
-  }
-
-  // Dışa yayılan yumuşak ışık halkası
-  Rectangle {
-    anchors.centerIn: parent
-    readonly property real size: 12 + 18 * dots.ripple
-    width: size
-    height: size
-    radius: size / 2
-    color: "transparent"
-    border.width: 1.5
-    border.color: dots.dotColor
-    opacity: (1.0 - dots.ripple) * 0.45
-  }
-
-  // Merkezdeki yumuşak nefes alan parıltı aurası
-  Rectangle {
-    anchors.centerIn: parent
-    readonly property real auraSize: 18 + 6 * dots.breath
-    width: auraSize
-    height: auraSize
-    radius: auraSize / 2
-    color: dots.dotColor
-    opacity: 0.12 + 0.18 * dots.breath
-  }
-
-  // İç halesi (glow halo)
-  Rectangle {
-    anchors.centerIn: parent
-    readonly property real coreHaloSize: 13 + 3 * dots.breath
-    width: coreHaloSize
-    height: coreHaloSize
-    radius: coreHaloSize / 2
-    color: dots.dotColor
-    opacity: 0.25 + 0.25 * dots.breath
-  }
-
-  // Merkezdeki Claude kıvılcımı
-  Text {
-    id: glyphText
-    anchors.centerIn: parent
-    text: dots.glyph
-    color: dots.dotColor
-    font.family: "JetBrainsMono Nerd Font"
-    font.pixelSize: 15 + 2 * dots.breath
   }
 }
