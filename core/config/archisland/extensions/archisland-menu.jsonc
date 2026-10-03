@@ -31,6 +31,12 @@
     "aliases": ["ocr", "ocr-translate", "translate"],
     "action": "ocr-translate"
   },
+  "ask": {
+    "icon": "󰚩",
+    "label": "Ask Claude (Soru Sor)",
+    "aliases": ["ask", "sor", "soru", "claude", "ai"],
+    "action": "/home/asaf/.local/bin/island apps"
+  },
 
   // Style fixes
   "style.about": {"when": "false"},
