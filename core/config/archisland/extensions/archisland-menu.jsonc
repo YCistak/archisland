@@ -1,30 +1,61 @@
 {
-  // Extend the Quickshell ArchIsland menu with JSONC.
-  //
-  // IDs are object keys. The parent is inferred from the dotted id, so
-  // "personal.notes" appears under "personal", and "personal" appears on the
-  // root menu. Reuse an existing id to override/extend it.
-  //
-  // Fields:
-  //   icon        Nerd Font glyph shown in the icon column.
-  //   label       Visible row title.
-  //   action      Shell command to run. If omitted, the row is a submenu.
-  //   target      Existing submenu id to open. Use for links/aliases.
-  //   provider    Name of a shell-defined runtime row source (e.g. "fonts").
-  //   aliases     alternate `archisland menu summon <name>` routes; also searchable.
-  //   description Optional subtitle and extra search text.
-  //   when        Shell condition; hide row when it fails.
-  //   checked     Shell condition; append ✓ when it succeeds.
-  //
-  // Examples:
-  // "personal": {"icon":"","label":"Personal"},
-  // "personal.notes": {"icon":"󰎞","label":"Notes","action":"archisland-launch-editor ~/notes"},
-  // "personal.files": {"icon":"","label":"Files","action":"uwsm-app -- nautilus ~/Documents"},
-  //
-  // provider can only reference row sources the shell already defines (the
-  // providers map in Menu.qml). Static submenus only need dotted ids.
-  //
-  // Example: replace the default About action by reusing the same id. Existing
-  // fields are kept unless overridden.
-  // "about": {"icon":"","label":"About","action":"archisland-launch-or-focus-tui \"zsh -c 'fastfetch; read -k 1'\""},
+  "about": {"when": "false"},
+  "learn": {"when": "false"},
+  "apps": {"when": "false"},
+  "system": {"when": "false"},
+  "update": {"when": "false"},
+  "update.archisland": {"when": "false"},
+  "remove": {"when": "false"},
+  "install": {"when": "false"},
+
+  // Ana Menü Girdileri
+  "dev": {
+    "icon": "",
+    "label": "Geliştirici & AI Kota",
+    "aliases": ["dev", "island-dev", "developer"],
+    "action": "/home/asaf/.local/bin/island show dev"
+  },
+  "ocr": {
+    "icon": "󰴑",
+    "label": "OCR & Ekran Çeviri",
+    "aliases": ["ocr", "ocr-translate", "translate"],
+    "action": "ocr-translate"
+  },
+
+  // Style fixes
+  "style.about": {"when": "false"},
+  "style.theme": {"icon":"󰸌","label":"Theme","aliases":["theme","themes"],"action":"archisland-shell guilhermerisu.island themes"},
+  "style.background": {"icon":"","label":"Background","aliases":["background","wallpaper"],"action":"archisland-shell guilhermerisu.island wallpapers"},
+  "style.bar": {"when": "false"},
+  "style.island": {"icon":"󰍜","label":"Island Settings","parent":"style","action":"archisland-shell guilhermerisu.island show settings"},
+  "style.hyprland": {"icon":"","label":"Hyprland","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
+
+  // Setup fixes
+  "setup.monitors": {"icon":"󰍹","label":"Monitors","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
+  "setup.keybindings": {"icon":"","label":"Keybindings","action":"archisland-shell guilhermerisu.island show keybinds"},
+  "setup.input": {"icon":"","label":"Input","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
+
+  // Trigger fixes
+  "trigger.toggle.top-bar": {"icon":"󰍜","label":"Dynamic Island","action":"/home/asaf/.local/bin/island toggle"},
+
+  // Install detection fixes (recognize system packages and local runtimes)
+  "install.development.python": {"disabled": "archisland-cmd-present python || [[ -d $HOME/.local/share/mise/installs/python ]]"},
+  "install.development.javascript.node": {"disabled": "archisland-cmd-present node || [[ -d $HOME/.local/share/mise/installs/node ]]"},
+  "install.development.go": {"disabled": "archisland-cmd-present go || [[ -d $HOME/.local/share/mise/installs/go ]]"},
+  "install.development.rust": {"disabled": "archisland-cmd-present rustc || [[ -d $HOME/.rustup ]]"},
+  "install.development.java": {"disabled": "archisland-cmd-present java || [[ -d $HOME/.local/share/mise/installs/java ]]"},
+  "install.development.dotnet": {"disabled": "archisland-cmd-present dotnet || [[ -d $HOME/.local/share/mise/installs/dotnet ]]"},
+  "install.development.javascript.bun": {"disabled": "archisland-cmd-present bun || [[ -d $HOME/.local/share/mise/installs/bun ]]"},
+  "install.development.javascript.deno": {"disabled": "archisland-cmd-present deno || [[ -d $HOME/.local/share/mise/installs/deno ]]"},
+  "install.development.php.php": {"disabled": "archisland-cmd-present php || [[ -d $HOME/.local/share/mise/installs/php ]]"},
+  "install.development.zig": {"disabled": "archisland-cmd-present zig || [[ -d $HOME/.local/share/mise/installs/zig ]]"},
+  "install.style.font.meslo": {"disabled": "fc-list : family | grep -qi meslo"},
+  "install.gaming.steam": {"disabled": "archisland-cmd-present steam || archisland-pkg-present steam"},
+
+  // Portal & Last Session
+  "dev.portal": {"icon":"󰛳","label":"Portal (Dev Ports & Tunnels)","action":"/home/asaf/.local/bin/island portal"},
+  "setup.config.last-session": {"icon":"󰁯","label":"Last Session Config","action":"~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session config"},
+  "system.logout": {"icon":"󰍃","label":"Logout","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-logout"},
+  "system.reboot": {"icon":"󰜉","label":"Reboot","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-reboot"},
+  "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-shutdown"}
 }
