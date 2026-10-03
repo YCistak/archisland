@@ -9,6 +9,7 @@
   "install": {"when": "false"},
   "setup": {"when": "false"},
   "trigger": {"when": "false"},
+  "style": {"when": "false"},
 
   // Trigger altındaki öğeleri ana menüye (root) çıkarma
   "trigger.capture": {"parent": "root"},
@@ -30,12 +31,6 @@
     "label": "OCR & Ekran Çeviri",
     "aliases": ["ocr", "ocr-translate", "translate"],
     "action": "ocr-translate"
-  },
-  "ask": {
-    "icon": "󰚩",
-    "label": "Ask Claude (Soru Sor)",
-    "aliases": ["ask", "sor", "soru", "claude", "ai"],
-    "action": "/home/asaf/.local/bin/island apps"
   },
 
   // Style fixes
