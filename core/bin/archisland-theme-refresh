@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# archisland:summary=Refresh the current theme from its templates.
+
+THEME_NAME_PATH="$HOME/.local/state/archisland/current/theme.name"
+
+if [[ -f $THEME_NAME_PATH ]]; then
+  ARCHISLAND_THEME_SKIP_BACKGROUND=1 archisland-theme-set "$(cat $THEME_NAME_PATH)"
+fi

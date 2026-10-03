@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# archisland:summary=Toggle single-window square aspect ratio.
+
+case $(archisland-hyprland-toggle single-window-aspect-ratio) in
+  on) archisland-notification-send -g  "Enable single-window square aspect ratio" ;;
+  off) archisland-notification-send -g  "Disable single-window square aspect ratio" ;;
+esac

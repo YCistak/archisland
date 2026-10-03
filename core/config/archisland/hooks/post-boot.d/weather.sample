@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Show the weather status notification after ArchIsland has started.
+# To put it into use, remove .sample from this file name.
+
+weather=$(archisland-weather-status 2>/dev/null) || true
+
+if [[ -n $weather && $weather != "Weather unavailable" ]]; then
+  archisland-notification-send -u low "$weather"
+fi

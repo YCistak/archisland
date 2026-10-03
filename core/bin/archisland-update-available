@@ -1,0 +1,10 @@
+#!/bin/bash
+# Bekleyen paket güncellemelerini listeler; güncelleme yoksa 1 ile çıkar.
+set -uo pipefail
+updates=$( { checkupdates --nocolor 2>/dev/null; command -v paru >/dev/null && paru -Qua 2>/dev/null; } | sed '/^$/d')
+if [[ -n $updates ]]; then
+  printf '%s\n' "$updates"
+  exit 0
+fi
+echo "System is up to date"
+exit 1

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# archisland:summary=Cache background switcher thumbnails for the current theme
+
+theme_name=$(cat "$HOME/.local/state/archisland/current/theme.name" 2>/dev/null)
+
+archisland-menu-images \
+  --cache-only \
+  "$HOME/.local/state/archisland/current/theme/backgrounds" \
+  "$HOME/.config/archisland/backgrounds/$theme_name"

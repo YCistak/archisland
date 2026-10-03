@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# archisland:summary=Returns true when clamshell mode is active
+# archisland:hidden=true
+
+# Clamshell = lid closed while driving one or more external monitors.
+archisland-hw-laptop-closed && archisland-hw-external-monitors

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Overwrite the user config for hyprsunset with the ArchIsland default and restart the service.
+
+archisland-refresh-config hypr/hyprsunset.conf
+archisland-restart-hyprsunset

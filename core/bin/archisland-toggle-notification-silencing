@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Toggle notification do-not-disturb mode
+
+state=$(archisland-shell notifications toggleDnd 2>/dev/null || echo "")
+archisland-shell -q archisland.indicators refresh

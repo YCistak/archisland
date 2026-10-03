@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# archisland:summary=Wake displays and restore brightness after idle
+# archisland:group=system
+# archisland:name=wake
+# archisland:examples=archisland system wake
+
+archisland-brightness-display on
+archisland-brightness-keyboard restore
+archisland-hyprland-monitor-clamshell >/dev/null 2>&1 || true

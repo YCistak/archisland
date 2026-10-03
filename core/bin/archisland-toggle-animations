@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# archisland:summary=Toggle animations, transparency and other effects that are slow without a GPU
+# archisland:args=[toggle|on|off]
+# archisland:examples=archisland toggle animations | archisland toggle animations off | archisland toggle animations on
+
+# The flag records animations being off, so on and off swap on the way through.
+case ${1:-toggle} in
+toggle) archisland-hyprland-toggle no-animations toggle ;;
+on) archisland-hyprland-toggle no-animations off ;;
+off) archisland-hyprland-toggle no-animations on ;;
+*)
+  echo "Usage: archisland-toggle-animations [toggle|on|off]" >&2
+  exit 1
+  ;;
+esac
+
+if archisland-hyprland-toggle-enabled no-animations; then
+  archisland-notification-send -g 󰕟 "Animations disabled"
+else
+  archisland-notification-send -g 󰕟 "Animations enabled"
+fi

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# archisland:summary=Install Zed Editor and configure it with the current ArchIsland theme
+
+echo "Installing Zed Editor..."
+archisland-pkg-add zed omazed
+
+# Apply ArchIsland theme to Zed
+omazed setup
+
+setsid uwsm-app -- gtk-launch dev.zed.Zed >/dev/null 2>&1 &

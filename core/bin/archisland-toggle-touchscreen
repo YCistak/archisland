@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Enable, disable, or toggle the touch functionality of the screen
+# archisland:args=[on|off|toggle]
+
+exec archisland-toggle-input-device touchscreen "${1:-toggle}"

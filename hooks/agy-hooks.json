@@ -1,0 +1,10 @@
+{
+  "archisland-ada": {
+    "PreInvocation": [
+      { "type": "command", "command": "bash __KANCA__ agy working", "timeout": 5 }
+    ],
+    "Stop": [
+      { "type": "command", "command": "bash __KANCA__ agy done", "timeout": 5 }
+    ]
+  }
+}

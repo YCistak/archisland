@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# archisland:summary=Apply the current theme keyboard color to supported keyboards
+# archisland:hidden=true
+
+archisland-theme-set-keyboard-asus-rog
+archisland-theme-set-keyboard-f16

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# archisland:summary=Reload btop configuration (used by the ArchIsland theme switching).
+
+pkill -SIGUSR2 btop

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# archisland:summary=Remove the Xbox Cloud Gaming web app.
+
+set -e
+
+archisland-webapp-remove "Xbox Cloud Gaming"

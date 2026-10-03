@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Check if a toggle is enabled (flag file exists)
+# archisland:args=<flag-name>
+
+[[ -f "$HOME/.local/state/archisland/toggles/$1" ]]

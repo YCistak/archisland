@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# archisland:summary=Reload hyprland configuration (used by the ArchIsland theme switching).
+
+hyprctl reload >/dev/null

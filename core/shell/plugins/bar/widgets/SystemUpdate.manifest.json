@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "archisland.system-update",
+  "name": "ArchIsland update",
+  "version": "1.0.0",
+  "author": "ArchIsland",
+  "description": "Indicates available ArchIsland updates",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "SystemUpdate.qml"
+  },
+  "barWidget": {
+    "displayName": "ArchIsland update",
+    "description": "Indicates available ArchIsland updates",
+    "category": "System",
+    "allowMultiple": false
+  }
+}

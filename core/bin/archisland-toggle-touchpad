@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Enable, disable, or toggle the touchpad
+# archisland:args=[on|off|toggle]
+
+exec archisland-toggle-input-device touchpad "${1:-toggle}"

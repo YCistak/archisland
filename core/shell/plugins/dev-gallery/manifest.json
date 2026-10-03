@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "archisland.dev-gallery",
+  "name": "Dev gallery",
+  "version": "1.0.0",
+  "author": "ArchIsland",
+  "description": "Visual reference for archisland-shell common UI components. Summon with: archisland-shell shell summon archisland.dev-gallery '{}' (or run: archisland dev ui-preview).",
+  "kinds": [
+    "panel"
+  ],
+  "entryPoints": {
+    "panel": "GalleryPanel.qml"
+  }
+}

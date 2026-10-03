@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# archisland:summary=Open the ArchIsland background switcher
+# archisland:group=theme
+# archisland:name=bg-switcher
+# archisland:aliases=archisland background
+
+theme_name=$(cat "$HOME/.local/state/archisland/current/theme.name" 2>/dev/null)
+current_background=$(readlink -f "$HOME/.local/state/archisland/current/background" 2>/dev/null)
+
+archisland-menu-images \
+  --selected "$current_background" \
+  "$HOME/.local/state/archisland/current/theme/backgrounds" \
+  "$HOME/.config/archisland/backgrounds/$theme_name"

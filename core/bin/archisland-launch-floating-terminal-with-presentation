@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# archisland:summary=Launch a floating terminal with the ArchIsland presentation wrapper
+# archisland:args=<command>
+
+# Export the current theme's gum styling so gum widgets match the active theme
+# even after a theme switch (the inherited environment is captured at login).
+source archisland-restart-gum
+
+cmd="$*"
+# 130 is the user bailing with Ctrl-C; anything else gets the Done/Failed prompt.
+presentation_script="archisland-show-logo; $cmd; code=\$?; if (( code != 130 )); then archisland-show-done \$code; fi"
+
+exec setsid uwsm-app -- xdg-terminal-exec --app-id=org.archisland.terminal --title=ArchIsland -e bash -c "$presentation_script"

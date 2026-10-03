@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# archisland:summary=Open a config file in the user's editor and surface a toast
+# archisland:args=<path>
+# archisland:examples=archisland launch config-editor ~/.config/hypr/hyprland.lua
+
+path="${1-}"
+
+if [[ -z $path ]]; then
+  echo "Usage: archisland-launch-config-editor <path>" >&2
+  exit 1
+fi
+
+archisland-notification-send -u low "Editing config file" "$path"
+exec archisland-launch-editor "$path"

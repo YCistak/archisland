@@ -1,0 +1,6 @@
+#!/bin/bash
+# archisland:summary=Launch emojis
+# archisland:group=menu
+# archisland:examples=archisland menu emoji
+
+archisland-shell shell toggle archisland.emojis

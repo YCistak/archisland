@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# ArchIsland CLI - Unified command controller for ArchIsland Dynamic Island
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPTS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/archisland/scripts"
+[[ ! -d "$SCRIPTS_DIR" ]] && SCRIPTS_DIR="$HERE/scripts"
+
+ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"
+export ARCHISLAND_PATH
+export PATH="$SCRIPTS_DIR:$ARCHISLAND_PATH/bin:$HOME/.local/bin:$PATH"
+
+call_shell() {
+  if command -v archisland-shell >/dev/null 2>&1; then
+    exec archisland-shell guilhermerisu.island "$@"
+  elif [[ -x "$ARCHISLAND_PATH/bin/archisland-shell" ]]; then
+    exec "$ARCHISLAND_PATH/bin/archisland-shell" guilhermerisu.island "$@"
+  else
+    echo "ArchIsland daemon not found or IPC unreachable." >&2
+    exit 1
+  fi
+}
+
+case "${1:-}" in
+  toggle)
+    call_shell toggle
+    ;;
+  tray)
+    call_shell show tray
+    ;;
+  menu)
+    if command -v archisland-menu >/dev/null 2>&1; then
+      exec archisland-menu toggle
+    else
+      call_shell toggle
+    fi
+    ;;
+  apps)
+    call_shell apps
+    ;;
+  power)
+    call_shell power
+    ;;
+  pr|prs)
+    shift || true
+    exec "$SCRIPTS_DIR/gh-pr.sh" "${@:-summary}"
+    ;;
+  ports)
+    exec "$SCRIPTS_DIR/list-ports.sh"
+    ;;
+  kill-port)
+    shift || true
+    exec "$SCRIPTS_DIR/kill-port.sh" "$@"
+    ;;
+  agent)
+    # Ajan durumu: island agent <claude|agy|gemini|codex> <working|waiting|done|idle> [oturum]
+    if [[ $# -lt 3 ]]; then
+      echo "Kullanım: island agent <ajan> <working|waiting|done|idle> [oturum-id]" >&2
+      exit 1
+    fi
+    call_shell agent "$2" "$3" "${4:-varsayilan}"
+    ;;
+  stats)
+    exec "$SCRIPTS_DIR/corner-stats.sh"
+    ;;
+  calendar)
+    shift || true
+    exec "$SCRIPTS_DIR/calendar-sync.py" "$@"
+    ;;
+  save-session)
+    if [[ -x "$SCRIPTS_DIR/session-manager.py" ]]; then
+      exec "$SCRIPTS_DIR/session-manager.py" save
+    else
+      echo "Session manager script not found." >&2
+      exit 1
+    fi
+    ;;
+  restore-session)
+    if [[ -x "$SCRIPTS_DIR/session-manager.py" ]]; then
+      exec "$SCRIPTS_DIR/session-manager.py" restore
+    else
+      echo "Session manager script not found." >&2
+      exit 1
+    fi
+    ;;
+  start)
+    if [[ -x "$ARCHISLAND_PATH/bin/archisland-launch-shell" ]]; then
+      exec "$ARCHISLAND_PATH/bin/archisland-launch-shell"
+    else
+      exec quickshell -n -p "$ARCHISLAND_PATH/shell"
+    fi
+    ;;
+  stop)
+    pkill -f "^/bin/bash $ARCHISLAND_PATH/bin/archisland-launch-shell" 2>/dev/null || true
+    pkill -f "^quickshell -n -p $ARCHISLAND_PATH/shell" 2>/dev/null || true
+    ;;
+  restart)
+    # Gözetmen (archisland-launch-shell) shell'i yeniden başlatır.
+    pkill -f "^quickshell -n -p $ARCHISLAND_PATH/shell" 2>/dev/null || true
+    ;;
+  *)
+    if [ $# -eq 0 ]; then
+      call_shell toggle
+    else
+      call_shell "$@"
+    fi
+    ;;
+esac

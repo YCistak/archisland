@@ -1,0 +1,9 @@
+#!/bin/bash
+# Sistem paketlerini günceller (paru varsa AUR dahil, yoksa pacman).
+set -e
+[[ ${1:-} == "-y" ]] && noconfirm=--noconfirm || noconfirm=
+if command -v paru >/dev/null 2>&1; then
+  paru -Syu $noconfirm
+else
+  sudo pacman -Syu $noconfirm
+fi

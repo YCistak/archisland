@@ -1,0 +1,7 @@
+: "${ARCHISLAND_PATH:=/usr/share/archisland}"
+source "$ARCHISLAND_PATH/default/bash/envs"
+source "$ARCHISLAND_PATH/default/bash/shell"
+source "$ARCHISLAND_PATH/default/bash/aliases"
+source "$ARCHISLAND_PATH/default/bash/functions"
+source "$ARCHISLAND_PATH/default/bash/init"
+[[ $- == *i* ]] && bind -f "$ARCHISLAND_PATH/default/bash/inputrc"

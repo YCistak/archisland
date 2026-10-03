@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# archisland:summary=Overwrite the user tmux config with the ArchIsland default and reload tmux.
+
+archisland-refresh-config tmux/tmux.conf
+archisland-restart-tmux

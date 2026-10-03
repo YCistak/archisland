@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "bash __KANCA__ codex working", "timeout": 5 } ] }
+    ],
+    "PostToolUse": [
+      { "hooks": [ { "type": "command", "command": "bash __KANCA__ codex working", "timeout": 5 } ] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [ { "type": "command", "command": "bash __KANCA__ codex waiting", "timeout": 5 } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "bash __KANCA__ codex done", "timeout": 5 } ] }
+    ]
+  }
+}

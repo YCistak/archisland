@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# archisland:summary=Reset shell.json to ArchIsland defaults
+# archisland:examples=archisland refresh shell
+
+set -euo pipefail
+
+archisland-refresh-config archisland/shell.json
+archisland-bar defaults
+
+archisland-restart-shell

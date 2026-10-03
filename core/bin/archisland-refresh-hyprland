@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# archisland:summary=Overwrite all the user Hyprland Lua configs in ~/.config/hypr with the ArchIsland defaults.
+
+archisland-refresh-config hypr/.luarc.json
+archisland-refresh-config hypr/autostart.lua
+archisland-refresh-config hypr/bindings.lua
+archisland-refresh-config hypr/input.lua
+archisland-refresh-config hypr/looknfeel.lua
+archisland-refresh-config hypr/hyprland.lua
+archisland-refresh-config hypr/monitors.lua
+
+mkdir -p ~/.local/state/archisland/toggles/hypr
+cp "$ARCHISLAND_PATH/default/hypr/toggles/flags.lua" ~/.local/state/archisland/toggles/hypr/

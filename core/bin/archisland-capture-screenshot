@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# archisland:summary=Take a screenshot
+# archisland:group=capture
+# archisland:args=[smart|region|windows|fullscreen|scroll] [copy|save]
+# archisland:examples=archisland screenshot | archisland capture screenshot region
+# archisland:aliases=archisland screenshot
+
+if [[ -n ${ARCHISLAND_SCREENSHOT_DIR:-} && -z ${OMASNAP_SCREENSHOT_DIR:-} ]]; then
+  export OMASNAP_SCREENSHOT_DIR="$ARCHISLAND_SCREENSHOT_DIR"
+fi
+
+omasnap_args=()
+for arg in "$@"; do
+  case "$arg" in
+    copy) omasnap_args+=(--copy) ;;
+    save) omasnap_args+=(--save) ;;
+    slurp) ;;
+    *) omasnap_args+=("$arg") ;;
+  esac
+done
+
+exec omasnap "${omasnap_args[@]}"

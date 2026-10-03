@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# archisland:summary=Toggle screensaver availability
+
+archisland-toggle screensaver-off
+
+if archisland-toggle-enabled screensaver-off; then
+  archisland-notification-send -g 󱄄 "Screensaver disabled"
+else
+  archisland-notification-send -g 󱄄 "Screensaver enabled"
+fi

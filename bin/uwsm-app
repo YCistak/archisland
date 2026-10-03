@@ -1,0 +1,16 @@
+#!/bin/sh
+# Compatibility shim for uwsm-app on CachyOS / non-UWSM Wayland setups
+while [ $# -gt 0 ]; do
+  if [ "$1" = "--" ]; then
+    shift
+    break
+  elif [ "${1#-}" != "$1" ]; then
+    shift
+  else
+    break
+  fi
+done
+
+if [ $# -gt 0 ]; then
+  exec "$@"
+fi
