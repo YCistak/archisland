@@ -48,6 +48,22 @@ Item {
 
   readonly property string kayitYolu: Quickshell.env("HOME") + "/.local/state/archisland/ai-quota-shown.json"
   FileView {
+    id: statsCache
+    path: "/tmp/archisland-corner-stats.json"
+    blockLoading: true
+    printErrors: false
+    onLoaded: {
+      try {
+        var d = JSON.parse(text())
+        if (d && (d.claude || d.antigravity || d.codex)) {
+          quota.veri = d
+          quota.degerlendir()
+        }
+      } catch (e) {}
+    }
+  }
+
+  FileView {
     id: kayit
     path: quota.kayitYolu
     blockLoading: true

@@ -98,6 +98,16 @@ pr_list=$(jq -c '.openList // []' "$tmpdir/gh_prs.json" 2>/dev/null)
 
 rm -f "$tmpdir"/* && rmdir "$tmpdir" 2>/dev/null
 
+claude_s=${claude_s:-0}
+claude_w=${claude_w:-0}
+claude_opus=${claude_opus:-0}
+claude_sonnet=${claude_sonnet:-0}
+agy_s=${agy_s:-0}
+agy_w=${agy_w:-0}
+agy_3p_s=${agy_3p_s:-0}
+agy_3p_w=${agy_3p_w:-0}
+codex_s=${codex_s:-0}
+
 result=$(jq -n \
   --arg cs "$claude_s" --arg cw "$claude_w" --arg co "$claude_opus" --arg csn "$claude_sonnet" \
   --arg as "$agy_s" --arg aw "$agy_w" --arg ab "$agy_burn" \
@@ -122,6 +132,9 @@ result=$(jq -n \
     github: { count: ($prc | tonumber), openList: $prlist }
   }')
 
+if [[ -f /tmp/archisland-corner-stats.json ]]; then
+  result=$(jq -s '.[0] * .[1]' /tmp/archisland-corner-stats.json <(echo "$result") 2>/dev/null || echo "$result")
+fi
+
 echo "$result" > /tmp/archisland-corner-stats.json.tmp && mv /tmp/archisland-corner-stats.json.tmp /tmp/archisland-corner-stats.json
-cp -f /tmp/archisland-corner-stats.json /tmp/archisland-corner-stats.json 2>/dev/null || true
 echo "$result"
