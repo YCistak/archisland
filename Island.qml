@@ -537,11 +537,22 @@ Item {
         required property var modelData
         screen: modelData
         visible: modelData.name === root.outputName
-        // i. kabarcık görünürse kendisi, değilse null (giriş maskesi için).
+        // Kabarcık nesneleri (kimlik başına bir tane; bkz.
+        // LiveActivities.kabarcikKimlikleri). KÖK NEDEN: Repeater `count`
+        // değiştiğinde temsilciler henüz kurulmamış oluyor, itemAt() null
+        // dönüyor ve itemAt'a bağlı bağlama bir daha hiç yeniden
+        // hesaplanmıyordu; maske kabarcıkları hiç içermiyordu. Liste artık
+        // Repeater'ın itemAdded/itemRemoved sinyalleriyle dolduruluyor.
+        property var kabarciklar: []
+        // i. kabarcık görünürse kendisi, değilse null.
         function kabarcik(i) {
-          var b = kabarcikRep.count > i ? kabarcikRep.itemAt(i) : null
+          var b = kabarciklar[i] || null
           return b && b.shown ? b : null
         }
+        readonly property Item kb0: kabarciklar[0] || null
+        readonly property Item kb1: kabarciklar[1] || null
+        readonly property Item kb2: kabarciklar[2] || null
+        readonly property Item kb3: kabarciklar[3] || null
         color: "transparent"
         surfaceFormat.opaque: false
         exclusionMode: ExclusionMode.Ignore
@@ -557,13 +568,19 @@ Item {
         // the click. The click that closes the view goes no further.
         mask: Region {
           item: (root.isFullscreen && root.view === "rest") ? null : (root.closesOnOutsideClick ? outsideArea : island)
-          // Görünen canlı etkinlik kabarcıkları da tıklanabilir (kimlik başına
-          // bir kabarcık; bkz. LiveActivities.kabarcikKimlikleri).
-          Region { item: window.kabarcik(0) }
-          Region { item: window.kabarcik(1) }
-          Region { item: window.kabarcik(2) }
-          Region { item: window.kabarcik(3) }
-          Region { item: window.kabarcik(4) }
+          // Görünen canlı etkinlik kabarcıkları da tıklanabilir. `item:` ile
+          // bağlanan alt bölgeler canlı güncellenmiyordu (gerçek fare
+          // kabarcığa hiç ulaşmıyordu); bu yüzden her kabarcık için sabit bir
+          // Region, geometrisi doğrudan kabarcığa bağlı (kabarcıklar pencereyi
+          // dolduran kabarcikAlani içinde, yani x/y pencere koordinatıdır).
+          Region { id: maskKb0; x: window.kb0 ? window.kb0.x : 0; y: window.kb0 ? window.kb0.y : 0
+            width: window.kb0 && window.kb0.shown ? window.kb0.width : 0; height: window.kb0 && window.kb0.shown ? window.kb0.height : 0 }
+          Region { id: maskKb1; x: window.kb1 ? window.kb1.x : 0; y: window.kb1 ? window.kb1.y : 0
+            width: window.kb1 && window.kb1.shown ? window.kb1.width : 0; height: window.kb1 && window.kb1.shown ? window.kb1.height : 0 }
+          Region { id: maskKb2; x: window.kb2 ? window.kb2.x : 0; y: window.kb2 ? window.kb2.y : 0
+            width: window.kb2 && window.kb2.shown ? window.kb2.width : 0; height: window.kb2 && window.kb2.shown ? window.kb2.height : 0 }
+          Region { id: maskKb3; x: window.kb3 ? window.kb3.x : 0; y: window.kb3 ? window.kb3.y : 0
+            width: window.kb3 && window.kb3.shown ? window.kb3.width : 0; height: window.kb3 && window.kb3.shown ? window.kb3.height : 0 }
         }
         // Teşhis (debugInput): maskeye giren ama hiçbir öğenin almadığı
         // basışları yazar; en altta durur ve olayı tüketmez.
@@ -579,10 +596,14 @@ Item {
         // Giriş maskesindeki öğelerin dikdörtgenleri (IPC regions, teşhis).
         function bolgeler() {
           var r = "island=" + root.sahneDikdortgen(island)
-          for (var i = 0; i < kabarcikRep.count; i++) {
+          for (var i = 0; i < window.kabarciklar.length; i++) {
             var b = window.kabarcik(i)
             if (b) r += " " + b.kimlik + "=" + root.sahneDikdortgen(b)
           }
+          // Maskedeki kabarcık bölgelerinin kendisi (boş olanlar yazılmaz).
+          var m = [maskKb0, maskKb1, maskKb2, maskKb3]
+          for (var j = 0; j < m.length; j++)
+            if (m[j].width > 0) r += " maske" + j + "=" + m[j].x + "," + m[j].y + " " + m[j].width + "x" + m[j].height
           return r
         }
         Component.onCompleted: if (visible) root.girisBolgeleri = bolgeler
@@ -763,6 +784,12 @@ Item {
           Repeater {
             id: kabarcikRep
             model: root.live.kabarcikKimlikleri
+            onItemAdded: function(index, item) {
+              var a = window.kabarciklar.slice(); a[index] = item; window.kabarciklar = a
+            }
+            onItemRemoved: function(index, item) {
+              var a = window.kabarciklar.slice(); a[index] = null; window.kabarciklar = a
+            }
             delegate: LiveBubble {
               required property string modelData
               host: root
