@@ -1,98 +1,90 @@
 import QtQuick
 
-// Apple Intelligence / Siri Liquid Aurora Orb:
-// Dinamik Ada'da çalışan modern, lüks, akıcı ve organik AI düşünme göstergesi.
-// Dönen çizgiler yerine yumuşak aurora renkleri, nefes alan ışık aurası ve
-// sıvı cam (liquid glass) parıltısı.
+// Kodlama ajanı / Siri düşünme göstergesi: akıcı, organik, donanımsal
+// hızlandırmalı yumuşak ışık parçacıkları ve soluk alan aurası.
 Item {
   id: dots
   property bool running: true
   property color dotColor: "#ffffff"
-  implicitWidth: 26
-  implicitHeight: 26
+  implicitWidth: 36
+  implicitHeight: 36
 
-  // 1. Yumuşak nefes alma nabzı
-  property real breath: 0
-  SequentialAnimation on breath {
-    loops: Animation.Infinite
-    running: dots.running && dots.visible
-    NumberAnimation { from: 0; to: 1; duration: 1600; easing.type: Easing.InOutSine }
-    NumberAnimation { from: 1; to: 0; duration: 1600; easing.type: Easing.InOutSine }
-  }
-
-  // 2. Sıvı aurora akış fazı (sürekli yumuşak akış)
-  property real flow: 0
-  NumberAnimation on flow {
-    from: 0; to: Math.PI * 2
-    duration: 3200
+  // Faz animasyonu: parçacıkların dalgalanması ve nefes alması için
+  property real phase: 0
+  NumberAnimation on phase {
+    from: 0
+    to: Math.PI * 2
+    duration: 2200
     loops: Animation.Infinite
     running: dots.running && dots.visible
   }
 
-  // Dışa yayılan yumuşak renkli ışık aurası (Ambient glow)
-  Rectangle {
-    anchors.centerIn: parent
-    width: 20 + 4 * dots.breath
-    height: width
-    radius: width / 2
-    color: "#a855f7"
-    opacity: 0.25 + 0.15 * dots.breath
+  // Yörünge dönüşü: kesintisiz ve takılmasız (vsync kilitli) dönüş
+  property real spin: 0
+  NumberAnimation on spin {
+    from: 0
+    to: Math.PI * 2
+    duration: 2800
+    loops: Animation.Infinite
+    running: dots.running && dots.visible
   }
 
+  // Merkezdeki hafif nefes alan aura parıltısı
   Rectangle {
     anchors.centerIn: parent
-    width: 17 + 3 * dots.breath
+    readonly property real auraPulse: 0.85 + 0.15 * Math.sin(dots.phase * 2)
+    width: 14 * auraPulse
     height: width
     radius: width / 2
-    color: "#38bdf8"
-    opacity: 0.20 + 0.15 * (1.0 - dots.breath)
+    color: dots.dotColor
+    opacity: 0.14 + 0.08 * Math.sin(dots.phase)
   }
 
-  // Ana cam küre (Liquid glass orb)
-  Rectangle {
-    id: glassCore
-    anchors.centerIn: parent
-    width: 19
-    height: 19
-    radius: 9.5
-    clip: true
-    color: "#0a0a0c"
-    border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.35 + 0.15 * dots.breath)
+  Item {
+    id: cluster
+    anchors.fill: parent
 
-    // İçteki akıcı aurora katmanları
-    // Mor/Magenta leke
-    Rectangle {
-      x: 1 + 3 * Math.cos(dots.flow)
-      y: 1 + 3 * Math.sin(dots.flow)
-      width: 14; height: 14; radius: 7
-      color: "#ec4899"
-      opacity: 0.75
-    }
-    // Mavi/Cyan leke
-    Rectangle {
-      x: 3 + 3 * Math.cos(dots.flow + Math.PI * 0.7)
-      y: 3 + 3 * Math.sin(dots.flow + Math.PI * 0.7)
-      width: 13; height: 13; radius: 6.5
-      color: "#06b6d4"
-      opacity: 0.75
-    }
-    // Sıcak Altın/Terakota leke
-    Rectangle {
-      x: 2 + 3 * Math.cos(dots.flow + Math.PI * 1.4)
-      y: 2 + 3 * Math.sin(dots.flow + Math.PI * 1.4)
-      width: 12; height: 12; radius: 6
-      color: "#f59e0b"
-      opacity: 0.70
-    }
-    // Merkezdeki parlak çekirdek parıltısı
-    Rectangle {
-      anchors.centerIn: parent
-      width: 7 + 2 * dots.breath
-      height: width
-      radius: width / 2
-      color: "#ffffff"
-      opacity: 0.45 + 0.25 * dots.breath
+    Repeater {
+      model: [
+        { offset: 0,              size: 6.8, amp: 1.4, r: 11.2, rAmp: 1.2, op: 0.95 },
+        { offset: Math.PI * 0.45, size: 5.4, amp: 1.1, r: 10.8, rAmp: 1.0, op: 0.78 },
+        { offset: Math.PI * 0.95, size: 4.2, amp: 0.9, r: 10.2, rAmp: 0.8, op: 0.58 },
+        { offset: Math.PI * 1.48, size: 3.2, amp: 0.7, r: 9.6,  rAmp: 0.6, op: 0.38 }
+      ]
+
+      delegate: Item {
+        required property int index
+        required property var modelData
+
+        readonly property real p: dots.phase + index * 0.65
+        readonly property real curAngle: dots.spin + modelData.offset + 0.32 * Math.sin(p)
+        readonly property real curRadius: modelData.r + modelData.rAmp * Math.sin(p)
+        readonly property real curSize: modelData.size + modelData.amp * Math.sin(p)
+        readonly property real curOpacity: Math.max(0.15, Math.min(1.0, modelData.op + 0.15 * Math.sin(p)))
+
+        x: cluster.width / 2 + Math.cos(curAngle) * curRadius
+        y: cluster.height / 2 + Math.sin(curAngle) * curRadius
+
+        // Yumuşak ışık halesi (halo)
+        Rectangle {
+          anchors.centerIn: parent
+          width: curSize + 3
+          height: width
+          radius: width / 2
+          color: dots.dotColor
+          opacity: curOpacity * 0.25
+        }
+
+        // Net çekirdek nokta
+        Rectangle {
+          anchors.centerIn: parent
+          width: curSize
+          height: width
+          radius: width / 2
+          color: dots.dotColor
+          opacity: curOpacity
+        }
+      }
     }
   }
 }

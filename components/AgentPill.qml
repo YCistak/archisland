@@ -1,21 +1,16 @@
 import QtQuick
 
 // Kodlama ajanı canlı etkinliği (aiAgents modülü): bir ya da birden çok ajan
-// çalışırken island'ın ana hapı. Solda çizgilerden dönen daire spinner,
-// ortada "Claude çalışıyor" / "Antigravity çalışıyor" / "Claude onay bekliyor",
-// sağda ajanın canlı maskotu/logosu (Claude maskotu veya Gemini logosu) ve saat.
+// çalışırken island'ın ana hapı. Solda dönen Siri noktaları (onay
+// bekleniyorsa uyarı simgesi), ortada "Claude çalışıyor" / "2 ajan
+// çalışıyor" / "Claude onay bekliyor". Çalışırken sağ kenarda küçük, soluk
+// saat durur (onay beklerken dikkat dağılmasın diye gösterilmez); yer darsa
+// özet metni kısalır, saat kalır.
 LivePill {
   id: pill
   shown: host.agentPill
   kimlikler: ["ajan", "ajanOnay"]
   readonly property bool bekliyor: host.agents.bekleyenVar
-  readonly property string activeAgent: {
-    if (pill.host.agents.tekAjan) return pill.host.agents.tekAjan
-    if (pill.host.agents.liste && pill.host.agents.liste.length > 0) return pill.host.agents.liste[0].ajan
-    return ""
-  }
-  readonly property bool isClaude: activeAgent === "claude"
-  readonly property bool isAgy: activeAgent === "agy" || activeAgent === "gemini"
 
   Item {
     id: badge
@@ -25,7 +20,7 @@ LivePill {
     width: 26; height: 26
     SiriDots {
       anchors.centerIn: parent
-      scale: 0.85
+      scale: 0.62
       visible: !pill.bekliyor
       running: pill.shown && !pill.bekliyor
     }
@@ -43,11 +38,10 @@ LivePill {
       }
     }
   }
-
   Text {
     anchors.left: badge.right
     anchors.leftMargin: 10
-    anchors.right: agentMark.left
+    anchors.right: dot.left
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
     text: pill.host.agents.ozet
@@ -58,82 +52,15 @@ LivePill {
     font.pixelSize: 14
     font.weight: Font.DemiBold
   }
-
-  // Sağ taraftaki ajan göstergesi: Claude animasyonlu maskotu, Gemini animasyonlu logosu
-  Item {
-    id: agentMark
+  // Ajanın rengi (birden çok tür ajan varsa nötr).
+  Rectangle {
+    id: dot
     anchors.right: saat.visible ? saat.left : parent.right
     anchors.rightMargin: saat.visible ? 10 : 16
     anchors.verticalCenter: parent.verticalCenter
-    width: pill.bekliyor ? 8 : (pill.isClaude ? 24 : (pill.isAgy ? 19 : 8))
-    height: 18
-
-    // 1. Claude Resmi Maskotu: Clawd (8-bit piksel animasyonlu yengeç)
-    Item {
-      id: claudeBox
-      anchors.fill: parent
-      visible: !pill.bekliyor && pill.isClaude
-
-      ClawdMascot {
-        anchors.centerIn: parent
-        running: pill.shown && claudeBox.visible
-      }
-    }
-
-    // 2. Gemini / AGY Logosu (Pulsing / parıldayan renkli yıldız)
-    Item {
-      id: geminiBox
-      anchors.centerIn: parent
-      width: 18; height: 18
-      visible: !pill.bekliyor && pill.isAgy
-
-      Image {
-        id: geminiLogo
-        anchors.fill: parent
-        source: Qt.resolvedUrl("../assets/gemini-logo.svg")
-        sourceSize.width: 48
-        sourceSize.height: 48
-        fillMode: Image.PreserveAspectFit
-      }
-
-      // Canlı parıldayan yıldız nabzı (nefes alma ve hafif açı salınımı)
-      SequentialAnimation on scale {
-        loops: Animation.Infinite
-        running: pill.shown && geminiBox.visible
-        NumberAnimation { from: 0.90; to: 1.15; duration: 900; easing.type: Easing.InOutSine }
-        NumberAnimation { from: 1.15; to: 0.90; duration: 900; easing.type: Easing.InOutSine }
-      }
-      SequentialAnimation on rotation {
-        loops: Animation.Infinite
-        running: pill.shown && geminiBox.visible
-        NumberAnimation { from: -6; to: 6; duration: 1800; easing.type: Easing.InOutSine }
-        NumberAnimation { from: 6; to: -6; duration: 1800; easing.type: Easing.InOutSine }
-      }
-    }
-
-    // 3. Onay bekleyen ajan (Urgent dot)
-    Rectangle {
-      anchors.centerIn: parent
-      visible: pill.bekliyor
-      width: 8; height: 8; radius: 4
-      color: pill.host.theme.urgent
-    }
-
-    // 4. Diğer veya nötr ajan (soluk alan nokta)
-    Rectangle {
-      anchors.centerIn: parent
-      visible: !pill.bekliyor && !pill.isClaude && !pill.isAgy
-      width: 8; height: 8; radius: 4
-      color: pill.host.agents.ozetRenk
-      SequentialAnimation on opacity {
-        loops: Animation.Infinite
-        running: parent.visible
-        NumberAnimation { from: 0.4; to: 1.0; duration: 800; easing.type: Easing.InOutSine }
-        NumberAnimation { from: 1.0; to: 0.4; duration: 800; easing.type: Easing.InOutSine }
-      }
-    }
+    width: 8; height: 8; radius: 4
+    color: pill.bekliyor ? pill.host.theme.urgent : pill.host.agents.ozetRenk
   }
-
   PillClock {
     id: saat
     host: pill.host

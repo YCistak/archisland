@@ -106,7 +106,6 @@ Rectangle {
       SiriDots {
         anchors.centerIn: parent
         scale: 0.42
-        dotColor: bubble.son ? bubble.son.renk : "#d97757"
         running: bubble.shown && parent.visible
       }
     }
