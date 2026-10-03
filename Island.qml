@@ -165,8 +165,28 @@ Item {
   //   - Sağ tık: takvimi açar.
   function islandClick(right) {
     feedbackTimer.stop()
+
+    // 1. Geri bildirim modundaysa (bildirim, pano, biten ajan vb.):
+    if (view === "feedback") {
+      if (notificationPill) {
+        if (notifications.last && notifications.last.islandUpdate) updateIsland()
+        else if (notifications.last && notifications.last.islandSetupRetry) { feedbackKind = ""; view = "rest"; setup.install() }
+        else dismissPillNotification()
+      } else if (clipboardPill) {
+        view = "clipboard"
+      } else if (activityPill) {
+        view = activities.current.kind === "bluetooth" ? "bluetooth" : "controls"
+      } else if (agentDonePill) {
+        feedbackKind = ""; view = "rest"
+      } else {
+        feedbackKind = ""; view = "rest"
+      }
+      return
+    }
+
     if (view !== "rest") return
 
+    // 2. Canlı etkinlik varsa (medya, çalışan ajan vb.):
     var baskaSeyVar = live.anaEtkinlik && live.ana !== "kurulum"
 
     if (baskaSeyVar) {
@@ -178,19 +198,14 @@ Item {
       return
     }
 
+    // 3. Sadece saat varsa:
     if (right) {
       if (viewAllowed("calendar")) view = "calendar"
       return
     }
 
-    if (notificationPill && notifications.last && notifications.last.islandUpdate) updateIsland()
-    else if (notificationPill && notifications.last && notifications.last.islandSetupRetry) { feedbackKind = ""; view = "rest"; setup.install() }
-    else if (notificationPill) dismissPillNotification()
-    else if (clipboardPill) view = "clipboard"
-    else if (activityPill) view = activities.current.kind === "bluetooth" ? "bluetooth" : "controls"
-    else if (setup.needsSetup) setup.pillClicked()
+    if (setup.needsSetup) setup.pillClicked()
     else if (quotaPill) aiQuota.kapat()
-    else if (agentDonePill) { feedbackKind = ""; view = "rest" }
     else view = "controls"
   }
 
@@ -460,6 +475,7 @@ Item {
     var row = notifications.last
     feedbackKind = ""
     view = "rest"
+    notifications.last = null
     if (row) notifications.command("dismissKey", row)
   }
 

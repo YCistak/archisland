@@ -36,7 +36,8 @@ USAGE
   exit 0
 fi
 
-(( $# >= 2 )) || fail "Usage: archisland-shell <target> <method> [args...]"
+ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"
+export ARCHISLAND_PATH
 [[ -n ${ARCHISLAND_PATH:-} ]] || fail "ARCHISLAND_PATH is not set"
 [[ -f $ARCHISLAND_PATH/shell/shell.qml ]] || fail "archisland-shell config not found: $ARCHISLAND_PATH/shell/shell.qml"
 

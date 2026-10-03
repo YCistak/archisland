@@ -16,9 +16,17 @@ Item {
   readonly property string iconSource: host.notifications.iconSource(host.notifications.last, imageFailed)
   readonly property var brand: host.notifications.brand(row)
 
-    opacity: host.notificationPill ? 1 : 0
+  opacity: host.notificationPill ? 1 : 0
   visible: opacity > 0.01
   Behavior on opacity { MotionAnimation { theme: host.theme; pace: "fade"; curve: "fade" } }
+
+  MouseArea {
+    anchors.fill: parent
+    enabled: pill.visible
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
+    cursorShape: Qt.PointingHandCursor
+    onClicked: function(mouse) { host.islandClick(mouse.button === Qt.RightButton) }
+  }
 
   ClippingRectangle {
     id: appTile
