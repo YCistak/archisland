@@ -3,7 +3,7 @@
   "id": "guilhermerisu.island",
   "name": "Island",
   "version": "0.1.0",
-  "author": "guilhermerisu",
+  "author": "YCistak",
   "description": "A floating, morphing ArchIsland bar",
   "kinds": [
     "bar"

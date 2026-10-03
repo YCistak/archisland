@@ -3,7 +3,7 @@
   "id": "archisland.elsewhen",
   "name": "Elsewhen",
   "version": "1.0.0",
-  "author": "Jason Fried",
+  "author": "ArchIsland",
   "license": "MIT",
   "description": "A world clock for the ArchIsland shell: the time in several cities at once, with a spinnable globe.",
   "kinds": [
