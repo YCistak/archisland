@@ -21,6 +21,7 @@ LivePill {
     SiriDots {
       anchors.centerIn: parent
       scale: 0.62
+      dotColor: pill.host.agents.renk || "#d97757"
       visible: !pill.bekliyor
       running: pill.shown && !pill.bekliyor
     }

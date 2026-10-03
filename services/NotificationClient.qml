@@ -53,10 +53,27 @@ Item {
     var name = row ? agent(row) : ""
     return name ? brands[name] : null
   }
+  function cleanText(text) {
+    if (!text) return ""
+    var s = String(text)
+    s = s.replace(/&lt;/gi, "<").replace(/&gt;/gi, ">").replace(/&amp;/gi, "&")
+         .replace(/&quot;/gi, '"').replace(/&#39;|&apos;/gi, "'").replace(/&nbsp;/gi, " ")
+    s = s.replace(/<\s*br\s*\/?>/gi, " · ")
+    s = s.replace(/<[^>]+>/g, "")
+    s = s.replace(/[\r\n]+/g, " · ")
+    s = s.replace(/(?:\s*·\s*)+/g, " · ")
+    s = s.replace(/\s+/g, " ")
+    s = s.replace(/^\s*·\s*|\s*·\s*$/g, "")
+    return s.trim()
+  }
   function title(row) {
     if (!row) return "Notification"
     if (agent(row) === "codex") return "Codex"
-    return String(row.summary || row.app || "Notification")
+    return cleanText(row.summary || row.app || "Notification")
+  }
+  function body(row) {
+    if (!row) return ""
+    return cleanText(row.body || row.app || "")
   }
   function age(timestamp) {
     var ms = Date.now() - Number(timestamp || 0)

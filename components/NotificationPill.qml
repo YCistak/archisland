@@ -98,9 +98,11 @@ Item {
     }
     Text {
       width: parent.width
-      text: String(pill.row.body || pill.row.app || "")
+      text: host.notifications.body(pill.row)
       visible: text !== ""
       textFormat: Text.PlainText
+      wrapMode: Text.WordWrap
+      maximumLineCount: 2
       elide: Text.ElideRight
       color: Qt.rgba(1, 1, 1, 0.72)
       font.family: "Adwaita Sans"

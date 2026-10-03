@@ -179,7 +179,7 @@ Rectangle {
           }
           Text {
             width: parent.width
-            text: String(note.modelData.body || "")
+            text: history.center.host.notifications.body(note.modelData)
             visible: text !== ""
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
