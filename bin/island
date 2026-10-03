@@ -54,11 +54,19 @@ case "${1:-}" in
     ;;
   agent)
     # Ajan durumu: island agent <claude|agy|gemini|codex> <working|waiting|done|idle> [oturum]
-    if [[ $# -lt 3 ]]; then
+    # veya: island agent clear / island agent list
+    if [[ "${2:-}" == "clear" || "${2:-}" == "reset" ]]; then
+      call_shell agent "clear" "clear" ""
+    elif [[ "${2:-}" == "list" || "${2:-}" == "status" ]]; then
+      call_shell agent "list" "list" ""
+    elif [[ $# -lt 3 ]]; then
       echo "Kullanım: island agent <ajan> <working|waiting|done|idle> [oturum-id]" >&2
+      echo "         island agent clear  (tüm oturumları temizler)" >&2
+      echo "         island agent list   (aktif oturumları listeler)" >&2
       exit 1
+    else
+      call_shell agent "$2" "$3" "${4:-varsayilan}"
     fi
-    call_shell agent "$2" "$3" "${4:-varsayilan}"
     ;;
   demo)
     # Animasyon demosu: island demo [senaryo]

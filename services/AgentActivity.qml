@@ -4,7 +4,7 @@ import QtQuick
 // Durumu ajanların kancaları (hooks/) island IPC'si üzerinden bildirir:
 //   archisland-shell guilhermerisu.island agent <ajan> <working|waiting|done|idle> <oturum>
 // Her oturum ayrı tutulur; aynı ajanın birden çok oturumu olabilir.
-// "working" bildirimi 30 dakika tazelenmezse oturum bayat sayılıp düşürülür.
+// "working" bildirimi 5 dakika tazelenmezse oturum bayat sayılıp düşürülür.
 Item {
   id: agents
   property bool enabled: false
@@ -17,7 +17,7 @@ Item {
 
   // "ajan/oturum" → { ajan, durum: "working"|"waiting", zaman }
   property var oturumlar: ({})
-  readonly property int bayatSure: 30 * 60 * 1000
+  readonly property int bayatSure: 5 * 60 * 1000
 
   readonly property var liste: {
     var out = []
@@ -50,11 +50,28 @@ Item {
   property string sonBiten: ""
   signal bitti(string ajan)
 
+  function oturumListesi() {
+    var out = []
+    for (var k in oturumlar) {
+      var o = oturumlar[k]
+      var sn = Math.round((Date.now() - o.zaman) / 1000)
+      out.push(k + " (" + o.durum + ", " + sn + "s once)")
+    }
+    return out.length ? out.join(", ") : "aktif ajan yok"
+  }
+
   function bildir(ajan, durum, oturum) {
     ajan = String(ajan || "").toLowerCase()
     durum = String(durum || "").toLowerCase()
     oturum = String(oturum || "varsayilan")
     if (!enabled) return "kapali"
+    if (durum === "list" || durum === "status" || ajan === "list") {
+      return oturumListesi()
+    }
+    if (ajan === "clear" || durum === "clear" || durum === "reset") {
+      oturumlar = ({})
+      return "temizlendi"
+    }
     if (!ajan) return "hata: ajan adı yok"
     var anahtar = ajan + "/" + oturum
     var kopya = Object.assign({}, oturumlar)
@@ -64,15 +81,19 @@ Item {
       var vardi = !!kopya[anahtar]
       delete kopya[anahtar]
       oturumlar = kopya
-      // Çalıştığını hiç bildirmemiş bir oturumun "bitti"si de gösterilir:
-      // kancası yalnız bitişte çalışan ajanlar (ör. Codex notify) için.
       sonBiten = ajan
       bitti(ajan)
       return vardi ? "bitti" : "bitti (oturum bilinmiyordu)"
     } else if (durum === "idle") {
-      delete kopya[anahtar]
+      if (oturum === "all" || oturum === "*" || oturum === "varsayilan") {
+        for (var k in kopya) {
+          if (kopya[k].ajan === ajan) delete kopya[k]
+        }
+      } else {
+        delete kopya[anahtar]
+      }
     } else {
-      return "hata: durum working|waiting|done|idle olmalı"
+      return "hata: durum working|waiting|done|idle|clear|reset olmalı"
     }
     oturumlar = kopya
     return durum
@@ -82,7 +103,7 @@ Item {
 
   // Bayat oturumları düşür.
   Timer {
-    interval: 60000
+    interval: 15000
     repeat: true
     running: agents.enabled && agents.sayi > 0
     onTriggered: {
