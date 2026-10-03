@@ -35,8 +35,10 @@
   "setup.keybindings": {"icon":"","label":"Keybindings","action":"archisland-shell guilhermerisu.island show keybinds"},
   "setup.input": {"icon":"","label":"Input","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
 
-  // Trigger fixes
-  "trigger.toggle.top-bar": {"icon":"󰍜","label":"Dynamic Island","action":"/home/asaf/.local/bin/island toggle"},
+  // Trigger / Toggle gizlemeleri
+  "trigger.toggle.screensaver": {"when": "false"},
+  "trigger.toggle.animations": {"when": "false"},
+  "trigger.toggle.top-bar": {"when": "false"},
 
   // Install detection fixes (recognize system packages and local runtimes)
   "install.development.python": {"disabled": "archisland-cmd-present python || [[ -d $HOME/.local/share/mise/installs/python ]]"},
