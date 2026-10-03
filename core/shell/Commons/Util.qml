@@ -55,7 +55,8 @@ QtObject {
   }
 
   function execDetached(command) {
-    Quickshell.execDetached(["bash", "-lc", command])
+    var prefix = 'export ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"; export PATH="$ARCHISLAND_PATH/bin:$HOME/.local/bin:$PATH"; '
+    Quickshell.execDetached(["bash", "-lc", prefix + command])
   }
 
   // Run an argv vector without a shell interpreting it: the constant `exec "$@"`
@@ -64,7 +65,8 @@ QtObject {
   // The login shell (-l) keeps the PATH/session env GUI targets (omasnap, mpv,
   // xdg-open) need. Prefer this over execDetached for anything built from input.
   function execArgv(argv) {
-    Quickshell.execDetached(["bash", "-lc", 'exec "$@"', "bash"].concat(argv))
+    var prefix = 'export ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"; export PATH="$ARCHISLAND_PATH/bin:$HOME/.local/bin:$PATH"; exec "$@"'
+    Quickshell.execDetached(["bash", "-lc", prefix, "bash"].concat(argv))
   }
 
   function isPlainObject(value) {
