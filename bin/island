@@ -60,6 +60,11 @@ case "${1:-}" in
     fi
     call_shell agent "$2" "$3" "${4:-varsayilan}"
     ;;
+  demo)
+    # Animasyon demosu: island demo [senaryo]
+    shift || true
+    exec "$SCRIPTS_DIR/demo.sh" "$@"
+    ;;
   stats)
     exec "$SCRIPTS_DIR/corner-stats.sh"
     ;;
