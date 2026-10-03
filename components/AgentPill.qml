@@ -18,19 +18,21 @@ LivePill {
   readonly property bool isAgy: activeAgent === "agy" || activeAgent === "gemini"
 
   // Claude için seçilebilir canlı animasyonlar (tıklandıkça değişir):
-  // 1. typing (klavye ve kod terminali ile çalışan Clawd)
-  // 2. laptop (laptop başında neon kod syntax'ı ile yazan Clawd)
-  // 3. hammering (baretli çekiçle inşa eden Clawd)
-  // 4. vibing (kulaklıkla müzik dinleyen Clawd)
-  // 5. hop (zıplayan neşeli Clawd)
-  // 6. celebrate (konfetilerle kutlayan Clawd)
+  // 1. laptop (laptop başında kod yazan, ekranında neon syntax akan Clawd)
+  // 2. crabwalk (yan yan yürüyen, kolları ve gövdesi sallanan Clawd)
+  // 3. vibing (mavi kulaklıkla müzik dinleyen, notalar uçuşan Clawd)
+  // 4. celebrate (havaya zıplayan, konfetiler yağan zafer Clawd)
+  // 5. coffee (kahvesini yudumlayan, dumanı tüten düşünceli Clawd)
+  // 6. thinking (gözleri yukarı bakan, düşünce balonu çıkan Clawd)
+  // 7. hammering (sarı baretli çekiçle inşa eden Clawd)
   readonly property var claudeAnims: [
-    "claude-typing.gif",
     "claude-laptop.gif",
-    "claude-hammering.gif",
+    "claude-crabwalk.gif",
     "claude-vibing.gif",
-    "claude-hop.gif",
-    "claude-celebrate.gif"
+    "claude-celebrate.gif",
+    "claude-coffee.gif",
+    "claude-thinking.gif",
+    "claude-hammering.gif"
   ]
   property int currentAnimIdx: 0
 
@@ -83,7 +85,7 @@ LivePill {
     anchors.right: saat.visible ? saat.left : parent.right
     anchors.rightMargin: saat.visible ? 10 : 16
     anchors.verticalCenter: parent.verticalCenter
-    width: pill.bekliyor ? 8 : (pill.isClaude ? Math.max(24, claudeMascot.width) : (pill.isAgy ? 19 : 8))
+    width: pill.bekliyor ? 8 : (pill.isClaude ? Math.max(30, claudeMascot.width) : (pill.isAgy ? 19 : 8))
     height: 24
 
     // 1. Claude Maskotu (Clawd) - Gerçek canlı GIF animasyonları (Tıklandığında animasyon değişir)
@@ -97,7 +99,7 @@ LivePill {
         anchors.centerIn: parent
         source: Qt.resolvedUrl("../assets/" + pill.claudeAnims[pill.currentAnimIdx])
         height: 22
-        width: implicitHeight > 0 ? Math.round(implicitWidth * (height / implicitHeight)) : 22
+        width: implicitHeight > 0 ? Math.round(implicitWidth * (height / implicitHeight)) : 34
         fillMode: Image.PreserveAspectFit
         smooth: false
         playing: pill.shown && claudeBox.visible
