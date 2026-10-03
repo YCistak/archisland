@@ -156,22 +156,39 @@ Item {
     return Math.round(p.x) + "," + Math.round(p.y) + " " + Math.round(q.x - p.x) + "x" + Math.round(q.y - p.y)
   }
 
-  // Island'a tıklama (fare ve IPC aynı işlevi kullanır). Sol: island'ın
-  // kendisi; sağ: ana etkinliğin detayı, etkinlik yoksa takvim.
+  // Island'a tıklama (fare ve IPC aynı işlevi kullanır).
+  // Adada saat dışında başka bir canlı etkinlik varsa (medya, ajan vb.):
+  //   - Sol tık: o etkinliğin detayını açar (openActivity).
+  //   - Sağ tık: normal dinamik adayı açar (controls).
+  // Adada sadece saat varsa (özel etkinlik yoksa):
+  //   - Sol tık: normal dinamik adayı açar (controls).
+  //   - Sağ tık: takvimi açar.
   function islandClick(right) {
     feedbackTimer.stop()
-    if (right) {
-      if (view !== "rest") return
-      if (live.anaEtkinlik && live.ana !== "kurulum") openActivity(live.anaEtkinlik)
-      else if (viewAllowed("calendar")) view = "calendar"
+    if (view !== "rest") return
+
+    var baskaSeyVar = live.anaEtkinlik && live.ana !== "kurulum"
+
+    if (baskaSeyVar) {
+      if (right) {
+        view = "controls"
+      } else {
+        openActivity(live.anaEtkinlik)
+      }
       return
     }
+
+    if (right) {
+      if (viewAllowed("calendar")) view = "calendar"
+      return
+    }
+
     if (notificationPill && notifications.last && notifications.last.islandUpdate) updateIsland()
     else if (notificationPill && notifications.last && notifications.last.islandSetupRetry) { feedbackKind = ""; view = "rest"; setup.install() }
     else if (notificationPill) dismissPillNotification()
     else if (clipboardPill) view = "clipboard"
     else if (activityPill) view = activities.current.kind === "bluetooth" ? "bluetooth" : "controls"
-    else if (view === "rest" && setup.needsSetup) setup.pillClicked()
+    else if (setup.needsSetup) setup.pillClicked()
     else if (quotaPill) aiQuota.kapat()
     else if (agentDonePill) { feedbackKind = ""; view = "rest" }
     else view = "controls"
@@ -504,6 +521,9 @@ Item {
       return root.girisBolgeleri ? root.girisBolgeleri() : "hata: pencere yok"
     }
     // Island'a tıklama (fareyle aynı işlev): "left" ya da "right".
+    function currentActivity(): string {
+      return (root.live.anaEtkinlik ? root.live.anaEtkinlik.id : "none") + " (sabit=" + root.live.sabit + ", ana=" + root.live.ana + ")"
+    }
     function click(button: string): string {
       if (button !== "left" && button !== "right") return "hata: left|right"
       root.islandClick(button === "right")
@@ -729,8 +749,9 @@ Item {
           height: Math.max(28, animatedHeight)
           Behavior on color { MotionColorAnimation { theme: root.theme } }
 
-          // Sol tık: island'ın kendisi (kontrol merkezi); sağ tık: ana
-          // etkinliğin detayı, etkinlik yoksa takvim (bkz. islandClick).
+          // Adada saat dışında etkinlik varsa: sol tık etkinliğin detayı,
+          // sağ tık kontrol merkezi. Sadece saat varsa: sol tık kontrol merkezi,
+          // sağ tık takvim (bkz. islandClick).
           MouseArea {
             anchors.fill: parent
             enabled: root.view === "rest" || root.view === "feedback"
