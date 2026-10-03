@@ -65,31 +65,18 @@ LivePill {
     anchors.right: saat.visible ? saat.left : parent.right
     anchors.rightMargin: saat.visible ? 10 : 16
     anchors.verticalCenter: parent.verticalCenter
-    width: pill.bekliyor ? 8 : (pill.isClaude ? 22 : (pill.isAgy ? 19 : 8))
-    height: 24
+    width: pill.bekliyor ? 8 : (pill.isClaude ? 24 : (pill.isAgy ? 19 : 8))
+    height: 18
 
-    // 1. Claude Maskotu (Animasyonlu yürüme + hafif canlı salınım)
+    // 1. Claude Resmi Maskotu: Clawd (8-bit piksel animasyonlu yengeç)
     Item {
       id: claudeBox
       anchors.fill: parent
       visible: !pill.bekliyor && pill.isClaude
 
-      AnimatedImage {
-        id: claudeMascot
+      ClawdMascot {
         anchors.centerIn: parent
-        source: Qt.resolvedUrl("../assets/claude-mascot.webp")
-        width: 22
-        height: 24
-        fillMode: Image.PreserveAspectFit
-        playing: pill.shown && claudeBox.visible
-      }
-
-      // Canlılık katan yumuşak nefes/salınım nabzı
-      SequentialAnimation on y {
-        loops: Animation.Infinite
         running: pill.shown && claudeBox.visible
-        NumberAnimation { from: 0; to: -1.5; duration: 550; easing.type: Easing.InOutQuad }
-        NumberAnimation { from: -1.5; to: 0; duration: 550; easing.type: Easing.InOutQuad }
       }
     }
 

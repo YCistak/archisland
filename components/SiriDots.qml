@@ -1,7 +1,9 @@
 import QtQuick
 
-// Kodlama ajanı / AI düşünme göstergesi:
-// Çizgilerden oluşan dönen daire (Apple iOS / macOS radyal çizgili spinner).
+// Apple Intelligence / Siri Liquid Aurora Orb:
+// Dinamik Ada'da çalışan modern, lüks, akıcı ve organik AI düşünme göstergesi.
+// Dönen çizgiler yerine yumuşak aurora renkleri, nefes alan ışık aurası ve
+// sıvı cam (liquid glass) parıltısı.
 Item {
   id: dots
   property bool running: true
@@ -9,38 +11,88 @@ Item {
   implicitWidth: 26
   implicitHeight: 26
 
-  Item {
-    id: wheel
-    anchors.fill: parent
+  // 1. Yumuşak nefes alma nabzı
+  property real breath: 0
+  SequentialAnimation on breath {
+    loops: Animation.Infinite
+    running: dots.running && dots.visible
+    NumberAnimation { from: 0; to: 1; duration: 1600; easing.type: Easing.InOutSine }
+    NumberAnimation { from: 1; to: 0; duration: 1600; easing.type: Easing.InOutSine }
+  }
 
-    // Akıcı ve sürekli 360 derece dönüş
-    RotationAnimation on rotation {
-      from: 0
-      to: 360
-      duration: 1000
-      loops: Animation.Infinite
-      running: dots.running && dots.visible
+  // 2. Sıvı aurora akış fazı (sürekli yumuşak akış)
+  property real flow: 0
+  NumberAnimation on flow {
+    from: 0; to: Math.PI * 2
+    duration: 3200
+    loops: Animation.Infinite
+    running: dots.running && dots.visible
+  }
+
+  // Dışa yayılan yumuşak renkli ışık aurası (Ambient glow)
+  Rectangle {
+    anchors.centerIn: parent
+    width: 20 + 4 * dots.breath
+    height: width
+    radius: width / 2
+    color: "#a855f7"
+    opacity: 0.25 + 0.15 * dots.breath
+  }
+
+  Rectangle {
+    anchors.centerIn: parent
+    width: 17 + 3 * dots.breath
+    height: width
+    radius: width / 2
+    color: "#38bdf8"
+    opacity: 0.20 + 0.15 * (1.0 - dots.breath)
+  }
+
+  // Ana cam küre (Liquid glass orb)
+  Rectangle {
+    id: glassCore
+    anchors.centerIn: parent
+    width: 19
+    height: 19
+    radius: 9.5
+    clip: true
+    color: "#0a0a0c"
+    border.width: 1
+    border.color: Qt.rgba(1, 1, 1, 0.35 + 0.15 * dots.breath)
+
+    // İçteki akıcı aurora katmanları
+    // Mor/Magenta leke
+    Rectangle {
+      x: 1 + 3 * Math.cos(dots.flow)
+      y: 1 + 3 * Math.sin(dots.flow)
+      width: 14; height: 14; radius: 7
+      color: "#ec4899"
+      opacity: 0.75
     }
-
-    Repeater {
-      model: 12
-      delegate: Item {
-        id: spoke
-        required property int index
-        anchors.fill: parent
-        rotation: index * 30
-
-        Rectangle {
-          anchors.horizontalCenter: parent.horizontalCenter
-          y: 2
-          width: 2.2
-          height: 5.8
-          radius: 1.1
-          color: dots.dotColor
-          // Kuyruğa doğru azalan opaklık (0: 1.0, 11: 0.12)
-          opacity: Math.max(0.12, 1.0 - (index / 12.0) * 0.88)
-        }
-      }
+    // Mavi/Cyan leke
+    Rectangle {
+      x: 3 + 3 * Math.cos(dots.flow + Math.PI * 0.7)
+      y: 3 + 3 * Math.sin(dots.flow + Math.PI * 0.7)
+      width: 13; height: 13; radius: 6.5
+      color: "#06b6d4"
+      opacity: 0.75
+    }
+    // Sıcak Altın/Terakota leke
+    Rectangle {
+      x: 2 + 3 * Math.cos(dots.flow + Math.PI * 1.4)
+      y: 2 + 3 * Math.sin(dots.flow + Math.PI * 1.4)
+      width: 12; height: 12; radius: 6
+      color: "#f59e0b"
+      opacity: 0.70
+    }
+    // Merkezdeki parlak çekirdek parıltısı
+    Rectangle {
+      anchors.centerIn: parent
+      width: 7 + 2 * dots.breath
+      height: width
+      radius: width / 2
+      color: "#ffffff"
+      opacity: 0.45 + 0.25 * dots.breath
     }
   }
 }
