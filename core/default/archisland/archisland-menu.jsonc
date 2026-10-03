@@ -84,7 +84,7 @@
   "trigger.share.clipboard": {"icon":"","label":"Clipboard","action":"archisland-menu-share clipboard"},
   "trigger.share.file": {"icon":"","label":"File","action":"archisland-menu-share file"},
   "trigger.share.folder": {"icon":"","label":"Folder","action":"archisland-menu-share folder"},
-  "trigger.share.receive": {"icon":"󰥦","label":"Receive","action":"uwsm-app -- localsend"},
+  "trigger.share.receive": {"icon":"󰥦","label":"Receive","action":"archisland-menu-share receive"},
   "trigger.toggle.idle-lock": {"icon":"󰅶","label":"Stay Awake","action":"archisland-toggle-idle"},
   "trigger.toggle.notifications": {"icon":"󰂛","label":"Notifications","action":"archisland-toggle-notification-silencing"},
   "trigger.toggle.crash-capture": {"icon":"󱚡","label":"Crash Capture","action":"archisland-toggle-crash-capture"},

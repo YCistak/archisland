@@ -7,16 +7,35 @@
 # archisland:examples=archisland share clipboard | archisland share file ~/Downloads/example.txt
 
 if (($# == 0)); then
-  echo "Usage: archisland-menu-share [clipboard|file|folder]"
+  echo "Usage: archisland-menu-share [clipboard|file|folder|receive]"
   exit 1
 fi
 
 MODE="$1"
 shift
 
+# LocalSend kurulu mu kontrol et
+if ! command -v localsend >/dev/null 2>&1; then
+  archisland-notification-send -g "" -u critical "LocalSend Kurulu Değil" "Dosya paylaşımı için LocalSend gereklidir.\nKurmak için: sudo pacman -S localsend"
+  exit 1
+fi
+
+if [[ $MODE == "receive" ]]; then
+  if command -v uwsm-app >/dev/null 2>&1; then
+    exec uwsm-app -- localsend
+  else
+    exec localsend
+  fi
+fi
+
 if [[ $MODE == "clipboard" ]]; then
   TEMP_FILE=$(mktemp --suffix=.txt)
-  wl-paste >"$TEMP_FILE"
+  wl-paste >"$TEMP_FILE" 2>/dev/null || true
+  if [[ ! -s "$TEMP_FILE" ]]; then
+    archisland-notification-send -g "" -u low "Pano Boş" "Paylaşılacak metin bulunamadı."
+    rm -f "$TEMP_FILE"
+    exit 0
+  fi
   FILE_ARRAY=("$TEMP_FILE")
 elif (($# > 0)); then
   FILE_ARRAY=("$@")
@@ -33,7 +52,7 @@ else
   picked=$(archisland-file-select "${select_args[@]}") || status=$?
 
   if ((${status:-0} > 1)); then
-    archisland-notification-send -g "" -u critical "Could not share" "The file chooser did not open"
+    archisland-notification-send -g "" -u critical "Paylaşım Başarısız" "Dosya seçici açılamadı"
     exit 1
   fi
 
@@ -42,9 +61,12 @@ else
 fi
 
 # Run LocalSend in its own systemd service (detached from terminal)
-systemd-run --user --quiet --collect localsend --headless send "${FILE_ARRAY[@]}"
-
-# Note: Temporary file will remain until system cleanup for clipboard mode
-# This ensures the file content is available for the LocalSend GUI
+if ! systemd-run --user --quiet --collect localsend --headless send "${FILE_ARRAY[@]}" 2>/dev/null; then
+  if command -v uwsm-app >/dev/null 2>&1; then
+    uwsm-app -- localsend "${FILE_ARRAY[@]}"
+  else
+    localsend "${FILE_ARRAY[@]}" &
+  fi
+fi
 
 exit 0

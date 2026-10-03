@@ -107,6 +107,13 @@ chmod +x "$SCRIPTS_DIR"/*
 install -m 755 "$HERE/bin/island" "$BIN_DIR/island"
 [[ -f $HERE/bin/uwsm-app ]] && install -m 755 "$HERE/bin/uwsm-app" "$BIN_DIR/uwsm-app"
 
+# 5b. Çekirdek yardımcı komutlarını BIN_DIR içine bağla
+for cmd in "$CORE_DIR/bin"/archisland-*; do
+  [[ -f "$cmd" ]] || continue
+  base=$(basename "$cmd")
+  [[ -e "$BIN_DIR/$base" ]] || ln -sf "$cmd" "$BIN_DIR/$base"
+done
+
 # 5b. Ajan kancası betiği (her zaman kopyalanır; ajan ayarlarına yalnız
 # --ajan-kancalari ile yazılır).
 HOOKS_DIR="$CONFIG_DIR/hooks"
