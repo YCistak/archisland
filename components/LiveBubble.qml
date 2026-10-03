@@ -121,9 +121,23 @@ Rectangle {
     }
   }
 
+  // Tıklama: IPC `swap` ile aynı işlev (LiveActivities.degistir). Kabarcığın
+  // en üstünde durur; giriş maskesi Region'ı bu kabarcığın kendisidir.
   MouseArea {
+    id: fare
     anchors.fill: parent
+    z: 10
     enabled: bubble.shown
-    onClicked: bubble.host.live.degistir(bubble.kimlik)
+    hoverEnabled: bubble.host.settings.debugInput
+    preventStealing: true
+    onEntered: bubble.host.girdiLog("kabarcık " + bubble.kimlik + " üzerine gelindi " + bubble.host.sahneDikdortgen(bubble))
+    onPressed: function(mouse) {
+      bubble.host.girdiLog("kabarcık " + bubble.kimlik + " basış (sıra " + bubble.sira + ") " + bubble.host.sahneDikdortgen(bubble))
+    }
+    onCanceled: bubble.host.girdiLog("kabarcık " + bubble.kimlik + " basış iptal")
+    onClicked: {
+      var sonuc = bubble.host.live.degistir(bubble.kimlik)
+      bubble.host.girdiLog("kabarcık " + bubble.kimlik + " tık → degistir: " + sonuc)
+    }
   }
 }

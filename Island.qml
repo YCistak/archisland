@@ -143,6 +143,19 @@ Item {
     else if (etkinlik.gorunum && viewAllowed(etkinlik.gorunum)) view = etkinlik.gorunum
   }
 
+  // Teşhis günlüğü: island.json'da debugInput true iken fare olaylarını yazar.
+  function girdiLog(metin) {
+    if (settings.debugInput) console.log("[girdi] " + metin)
+  }
+  // Öğenin sahne (pencere) koordinatlarındaki dikdörtgeni: mask Region'ı
+  // da aynı dönüşümü (mapToScene) kullanır.
+  function sahneDikdortgen(item) {
+    if (!item) return "yok"
+    var p = item.mapToItem(null, 0, 0)
+    var q = item.mapToItem(null, item.width, item.height)
+    return Math.round(p.x) + "," + Math.round(p.y) + " " + Math.round(q.x - p.x) + "x" + Math.round(q.y - p.y)
+  }
+
   // Island'a tıklama (fare ve IPC aynı işlevi kullanır). Sol: island'ın
   // kendisi; sağ: ana etkinliğin detayı, etkinlik yoksa takvim.
   function islandClick(right) {
@@ -485,6 +498,11 @@ Item {
     function swap(target: string): string {
       return root.live.degistir(target)
     }
+    // Teşhis: giriş maskesindeki island ve görünür kabarcık dikdörtgenleri
+    // (sahne koordinatları; kabarcık fare tıklamasının hedefi bunlardır).
+    function regions(): string {
+      return root.girisBolgeleri ? root.girisBolgeleri() : "hata: pencere yok"
+    }
     // Island'a tıklama (fareyle aynı işlev): "left" ya da "right".
     function click(button: string): string {
       if (button !== "left" && button !== "right") return "hata: left|right"
@@ -501,6 +519,8 @@ Item {
 
   // An open view closes on a click outside the island (see outsideArea),
   // armed a moment after it opens so the click that opened it can't count.
+  // Görünür pencerenin giriş bölgesi özeti (teşhis; bkz. IPC regions).
+  property var girisBolgeleri: null
   property bool outsideClickArmed: false
   readonly property bool closesOnOutsideClick: surfaceOpen && outsideClickArmed
   Timer {
@@ -545,6 +565,28 @@ Item {
           Region { item: window.kabarcik(3) }
           Region { item: window.kabarcik(4) }
         }
+        // Teşhis (debugInput): maskeye giren ama hiçbir öğenin almadığı
+        // basışları yazar; en altta durur ve olayı tüketmez.
+        MouseArea {
+          anchors.fill: parent
+          z: -1
+          enabled: root.settings.debugInput && !root.closesOnOutsideClick
+          onPressed: function(mouse) {
+            root.girdiLog("sahipsiz basış " + Math.round(mouse.x) + "," + Math.round(mouse.y) + " | " + root.girisBolgeleri())
+            mouse.accepted = false
+          }
+        }
+        // Giriş maskesindeki öğelerin dikdörtgenleri (IPC regions, teşhis).
+        function bolgeler() {
+          var r = "island=" + root.sahneDikdortgen(island)
+          for (var i = 0; i < kabarcikRep.count; i++) {
+            var b = window.kabarcik(i)
+            if (b) r += " " + b.kimlik + "=" + root.sahneDikdortgen(b)
+          }
+          return r
+        }
+        Component.onCompleted: if (visible) root.girisBolgeleri = bolgeler
+        onVisibleChanged: if (visible) root.girisBolgeleri = bolgeler
         MouseArea {
           id: outsideArea
           anchors.fill: parent
@@ -552,6 +594,7 @@ Item {
           acceptedButtons: Qt.AllButtons
           // Clicks on the island's blank space fall through to here too.
           onPressed: function(mouse) {
+            root.girdiLog("dış alan basış " + Math.round(mouse.x) + "," + Math.round(mouse.y))
             if (!island.contains(mapToItem(island, mouse.x, mouse.y))) root.view = "rest"
           }
         }
@@ -671,6 +714,10 @@ Item {
             anchors.fill: parent
             enabled: root.view === "rest" || root.view === "feedback"
             acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onPressed: function(mouse) {
+              root.girdiLog("island basış " + (mouse.button === Qt.RightButton ? "sağ" : "sol")
+                + " " + root.sahneDikdortgen(island))
+            }
             onClicked: function(mouse) { root.islandClick(mouse.button === Qt.RightButton) }
           }
 
@@ -709,6 +756,8 @@ Item {
         Item {
           id: kabarcikAlani
           anchors.fill: parent
+          // Kabarcıklar ve onların MouseArea'ları her zaman island'ın üstünde.
+          z: 2
           // Temsilcinin kendi "island" özelliğiyle çakışmasın diye.
           readonly property Item ada: island
           Repeater {

@@ -67,6 +67,10 @@ Item {
 
   // Eşiği aşan ajanların kaydını sil, gerekirse sıradaki uyarıyı seç.
   function degerlendir() {
+    // Veri henüz yokken (açılışta ilk yoklama gelmeden) "eşiğin üstünde"
+    // sayılıp kayıt silinmesin; yoksa her yeniden başlatmada uyarı tekrar
+    // çıkar ve ana island'ı kilitler (kabarcık tıklaması işe yaramaz).
+    if (!enabled || !veri) return
     var g = Object.assign({}, gosterilen), degisti = false
     for (var k in g) if (!altinda[k]) { delete g[k]; degisti = true }
     if (degisti) { gosterilen = g; kaydet() }

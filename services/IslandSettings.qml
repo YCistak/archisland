@@ -24,6 +24,9 @@ Item {
       id: settingsData
       property real motionScale: 1.5
       property bool hoverLift: true
+      // Teşhis: true iken island/baloncuk fare olayları günlüğe "[girdi] ..."
+      // satırları olarak yazılır (journalctl --user -t archisland-shell).
+      property bool debugInput: false
       property bool clock24h: true
       property bool mediaPill: true
       property bool ignoreBrowserMedia: true
