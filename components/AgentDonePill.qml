@@ -90,7 +90,7 @@ LivePill {
       width: 28
       anchors.verticalCenter: parent.verticalCenter
       horizontalAlignment: Text.AlignRight
-      text: "%" + satir.yuzde
+      text: satir.yuzde + "%"
       color: "#e2e6de"
       font.family: "Adwaita Sans"
       font.pixelSize: 10

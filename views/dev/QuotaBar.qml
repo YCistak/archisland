@@ -21,7 +21,7 @@ ColumnLayout {
       font.pixelSize: 12
     }
     Text {
-      text: "%" + bar.percent
+      text: bar.percent + "%"
       color: bar.theme.text
       font.family: "Adwaita Sans"
       font.pixelSize: 12

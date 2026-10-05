@@ -44,7 +44,7 @@ Item {
   property var alarm: null
   // Uyarısı zaten gösterilmiş ajanlar: { ajan: true }.
   property var gosterilen: ({})
-  readonly property string metin: alarm ? alarm.ad + " %" + alarm.kalan + " left" : ""
+  readonly property string metin: alarm ? alarm.ad + " " + alarm.kalan + "% left" : ""
 
   readonly property string kayitYolu: Quickshell.env("HOME") + "/.local/state/archisland/ai-quota-shown.json"
   FileView {
