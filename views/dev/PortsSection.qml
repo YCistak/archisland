@@ -12,7 +12,7 @@ ColumnLayout {
   Text {
     visible: ports.stats.ports.length === 0
     Layout.leftMargin: 4
-    text: ports.stats.loaded ? "Dinleyen port yok." : "Yükleniyor…"
+    text: ports.stats.loaded ? "No listening ports." : "Loading…"
     color: ports.theme.muted
     font.family: "Adwaita Sans"
     font.pixelSize: 13
@@ -67,7 +67,7 @@ ColumnLayout {
               spacing: 1
               Text {
                 Layout.fillWidth: true
-                text: (row.modelData.process || "süreç") + " · PID " + (row.modelData.pid || "?")
+                text: (row.modelData.process || "process") + " · PID " + (row.modelData.pid || "?")
                 elide: Text.ElideRight
                 color: ports.theme.text
                 font.family: "Adwaita Sans"
@@ -84,11 +84,11 @@ ColumnLayout {
               }
             }
             ChipButton {
-              theme: ports.theme; label: "󰖟"; tip: "Tarayıcıda aç"
+              theme: ports.theme; label: "󰖟"; tip: "Open in browser"
               onClicked: ports.stats.run(["xdg-open", "http://localhost:" + row.modelData.port])
             }
             ChipButton {
-              theme: ports.theme; label: "󰅖"; tip: "Süreci kapat"; ink: "#ff453a"
+              theme: ports.theme; label: "󰅖"; tip: "Kill process"; ink: "#ff453a"
               onClicked: ports.stats.run(["bash", "-c", 'kill -9 "$1" 2>/dev/null || fuser -k -n tcp "$2" 2>/dev/null || true',
                 "kill-port", String(Number(row.modelData.pid)), String(Number(row.modelData.port))])
             }

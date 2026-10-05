@@ -15,10 +15,10 @@ ColumnLayout {
 
   readonly property var tabs: {
     var all = [
-      { key: "ai", glyph: "󱚣", name: "AI kota", tint: "#d97757", on: stats.showAi },
+      { key: "ai", glyph: "󱚣", name: "AI quota", tint: "#d97757", on: stats.showAi },
       { key: "docker", glyph: "󰡨", name: "Docker", tint: "#0a84ff", on: stats.showDocker },
-      { key: "ports", glyph: "󰛳", name: "Portlar", tint: "#bf5af2", on: stats.showPorts },
-      { key: "pr", glyph: "󰊤", name: "PR'lar", tint: "#30d158", on: stats.showPr }
+      { key: "ports", glyph: "󰛳", name: "Ports", tint: "#bf5af2", on: stats.showPorts },
+      { key: "pr", glyph: "󰊤", name: "PRs", tint: "#30d158", on: stats.showPr }
     ]
     return all.filter(function(t) { return t.on })
   }
@@ -55,7 +55,7 @@ ColumnLayout {
     spacing: 6
     Text {
       Layout.fillWidth: true
-      text: "Geliştirici"
+      text: "Developer"
       color: dev.theme.text
       font.family: "Adwaita Sans"
       font.pixelSize: 17
@@ -82,7 +82,7 @@ ColumnLayout {
     Layout.leftMargin: 4
     Layout.bottomMargin: 4
     wrapMode: Text.WordWrap
-    text: "Geliştirici modülleri kapalı. Ayarlar → Modüller'den açabilirsin."
+    text: "Developer modules are off. You can turn them on in Settings → Modules."
     color: dev.theme.muted
     font.family: "Adwaita Sans"
     font.pixelSize: 13

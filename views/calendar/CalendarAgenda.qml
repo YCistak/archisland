@@ -53,7 +53,7 @@ Rectangle {
       }
       Text {
         visible: agenda.view.selectedIsToday
-        text: "Bugün"
+        text: "Today"
         color: agenda.theme.accent
         font.family: "Adwaita Sans"
         font.pixelSize: 12
@@ -63,7 +63,7 @@ Rectangle {
       ChipButton {
         theme: agenda.theme
         label: agenda.formOpen ? "󰅖" : "󰐕"
-        tip: agenda.formOpen ? "Vazgeç" : "Etkinlik ekle"
+        tip: agenda.formOpen ? "Cancel" : "Add event"
         checked: agenda.formOpen
         tint: agenda.theme.accent
         onClicked: {
@@ -73,15 +73,15 @@ Rectangle {
       }
     }
 
-    // Ekleme formu: ad, saat (boşsa "Tüm gün"), kaydet.
+    // Ekleme formu: ad, saat (boşsa "All day"), kaydet.
     RowLayout {
       Layout.fillWidth: true
       visible: agenda.formOpen
       spacing: 6
-      InputField { id: titleField; theme: agenda.theme; Layout.fillWidth: true; placeholder: "Etkinlik adı"; onSubmitted: agenda.save() }
+      InputField { id: titleField; theme: agenda.theme; Layout.fillWidth: true; placeholder: "Event title"; onSubmitted: agenda.save() }
       InputField { id: timeField; theme: agenda.theme; Layout.preferredWidth: 70; placeholder: "14:00"; mono: true; onSubmitted: agenda.save() }
       ChipButton {
-        theme: agenda.theme; glyph: false; label: "Kaydet"
+        theme: agenda.theme; glyph: false; label: "Save"
         checked: true; tint: agenda.theme.accent
         onClicked: agenda.save()
       }
@@ -92,7 +92,7 @@ Rectangle {
       Layout.leftMargin: 4
       Layout.topMargin: 2
       Layout.bottomMargin: 2
-      text: "Bu gün için etkinlik yok."
+      text: "No events for this day."
       color: agenda.theme.muted
       font.family: "Adwaita Sans"
       font.pixelSize: 13
@@ -117,7 +117,7 @@ Rectangle {
           spacing: 10
           Rectangle { width: 3; height: 18; radius: 1.5; color: agenda.theme.accent }
           Text {
-            text: row.modelData.time || "Tüm gün"
+            text: row.modelData.time || "All day"
             color: agenda.theme.accent
             font.family: "Adwaita Sans"
             font.pixelSize: 12
@@ -154,7 +154,7 @@ Rectangle {
       Layout.topMargin: 2
       Text {
         Layout.fillWidth: true
-        text: agenda.calendar.eventsCount + " kayıtlı etkinlik"
+        text: agenda.calendar.eventsCount + " saved events"
         color: agenda.theme.muted
         font.family: "Adwaita Sans"
         font.pixelSize: 11

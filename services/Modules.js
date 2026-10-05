@@ -9,7 +9,7 @@
 // kategori: "temel" (herkes için) veya "gelistirici" (geliştirici paketi).
 
 var kategoriler = [
-  { id: "temel", ad: "Temel", aciklama: "Everyday island features." },
+  { id: "temel", ad: "Essentials", aciklama: "Everyday island features." },
   { id: "gelistirici", ad: "Developer Pack", aciklama: "Live activities and Developer view sections for software developers. Off by default." }
 ]
 

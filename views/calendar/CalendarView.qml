@@ -14,10 +14,10 @@ ColumnLayout {
   readonly property var theme: host.theme
   readonly property color card: Qt.tint(theme.background, theme.withAlpha(theme.text, 0.075))
 
-  readonly property var monthNames: ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-    "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
-  readonly property var dayNamesLong: ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"]
-  readonly property var weekHeader: ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+  readonly property var monthNames: ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"]
+  readonly property var dayNamesLong: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+  readonly property var weekHeader: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
   property int displayYear: 2000
   property int displayMonth: 0
@@ -98,10 +98,10 @@ ColumnLayout {
       font.pixelSize: 17
       font.weight: Font.DemiBold
     }
-    ChipButton { theme: cal.theme; label: "󰅁"; tip: "Önceki ay"; onClicked: cal.moveMonth(-1) }
-    ChipButton { theme: cal.theme; label: "󰅂"; tip: "Sonraki ay"; onClicked: cal.moveMonth(1) }
+    ChipButton { theme: cal.theme; label: "󰅁"; tip: "Previous month"; onClicked: cal.moveMonth(-1) }
+    ChipButton { theme: cal.theme; label: "󰅂"; tip: "Next month"; onClicked: cal.moveMonth(1) }
     ChipButton {
-      theme: cal.theme; glyph: false; label: "Bugün"
+      theme: cal.theme; glyph: false; label: "Today"
       checked: cal.selectedIsToday; tint: cal.theme.accent
       onClicked: cal.goToToday()
     }
@@ -186,7 +186,7 @@ ColumnLayout {
     id: agenda
     Layout.fillWidth: true
     view: cal
-    title: cal.selectedDay + " " + cal.monthNames[cal.displayMonth] + ", "
-      + cal.dayNamesLong[new Date(cal.displayYear, cal.displayMonth, cal.selectedDay).getDay()]
+    title: cal.dayNamesLong[new Date(cal.displayYear, cal.displayMonth, cal.selectedDay).getDay()]
+      + ", " + cal.monthNames[cal.displayMonth] + " " + cal.selectedDay
   }
 }

@@ -109,18 +109,18 @@ ColumnLayout {
         visible: pr.repos.length === 0
         width: parent.width
         wrapMode: Text.WordWrap
-        text: "Depo eklenmedi. Ayarlar → Modüller'den depo ekle."
+        text: "No repositories added. Add some in Settings → Modules."
         color: pr.theme.muted
         font.family: "Adwaita Sans"
         font.pixelSize: 13
       }
     }
-    ChipButton { theme: pr.theme; label: "󰑐"; tip: "Yenile"; onClicked: pr.fetch() }
+    ChipButton { theme: pr.theme; label: "󰑐"; tip: "Refresh"; onClicked: pr.fetch() }
     ChipButton {
       theme: pr.theme
       visible: pr.repo !== ""
       label: pr.formOpen ? "󰅖" : "󰐕"
-      tip: pr.formOpen ? "Vazgeç" : "Yeni PR"
+      tip: pr.formOpen ? "Cancel" : "New PR"
       checked: pr.formOpen
       tint: "#ff9f0a"
       onClicked: pr.formOpen = !pr.formOpen
@@ -133,11 +133,11 @@ ColumnLayout {
     Layout.fillWidth: true
     visible: pr.repo !== ""
     spacing: 6
-    ChipButton { theme: pr.theme; glyph: false; label: "Açık"; checked: pr.filter === "open"; onClicked: pr.filter = "open" }
-    ChipButton { theme: pr.theme; glyph: false; label: "Tümü"; checked: pr.filter === "all"; onClicked: pr.filter = "all" }
+    ChipButton { theme: pr.theme; glyph: false; label: "Open"; checked: pr.filter === "open"; onClicked: pr.filter = "open" }
+    ChipButton { theme: pr.theme; glyph: false; label: "All"; checked: pr.filter === "all"; onClicked: pr.filter = "all" }
     Item { Layout.fillWidth: true }
     Text {
-      text: pr.loading ? "Yükleniyor…" : pr.prs.length + " PR"
+      text: pr.loading ? "Loading…" : pr.prs.length + " PR"
       color: pr.theme.muted
       font.family: "Adwaita Sans"
       font.pixelSize: 12
@@ -161,7 +161,7 @@ ColumnLayout {
       anchors.margins: 12
       spacing: 8
       Text {
-        text: "Daldan yeni PR · " + pr.repo
+        text: "New PR from branch · " + pr.repo
         color: "#ff9f0a"
         font.family: "Adwaita Sans"
         font.pixelSize: 13
@@ -170,9 +170,9 @@ ColumnLayout {
       RowLayout {
         Layout.fillWidth: true
         spacing: 6
-        InputField { id: branchField; theme: pr.theme; Layout.fillWidth: true; mono: true; placeholder: "kaynak dal"; onSubmitted: pr.createPr() }
+        InputField { id: branchField; theme: pr.theme; Layout.fillWidth: true; mono: true; placeholder: "source branch"; onSubmitted: pr.createPr() }
         Text { text: "󰁔"; color: pr.theme.muted; font.family: pr.theme.fontFamily; font.pixelSize: 14 }
-        InputField { id: baseField; theme: pr.theme; Layout.preferredWidth: 110; mono: true; placeholder: "varsayılan"; onSubmitted: pr.createPr() }
+        InputField { id: baseField; theme: pr.theme; Layout.preferredWidth: 110; mono: true; placeholder: "default"; onSubmitted: pr.createPr() }
       }
       Flow {
         Layout.fillWidth: true
@@ -192,16 +192,16 @@ ColumnLayout {
           }
         }
       }
-      InputField { id: titleField; theme: pr.theme; Layout.fillWidth: true; placeholder: "PR başlığı"; onSubmitted: pr.createPr() }
+      InputField { id: titleField; theme: pr.theme; Layout.fillWidth: true; placeholder: "PR title"; onSubmitted: pr.createPr() }
       RowLayout {
         Layout.fillWidth: true
         spacing: 6
         Item { Layout.fillWidth: true }
         ChipButton {
-          theme: pr.theme; glyph: false; label: "Web'de aç"
+          theme: pr.theme; glyph: false; label: "Open in browser"
           onClicked: { opener.command = ["gh", "pr", "create", "--web", "-R", pr.repo]; opener.startDetached() }
         }
-        ChipButton { theme: pr.theme; glyph: false; label: "PR oluştur"; checked: true; tint: "#ff9f0a"; onClicked: pr.createPr() }
+        ChipButton { theme: pr.theme; glyph: false; label: "Create PR"; checked: true; tint: "#ff9f0a"; onClicked: pr.createPr() }
       }
     }
   }
@@ -211,7 +211,7 @@ ColumnLayout {
   Text {
     visible: pr.repo !== "" && !pr.loading && pr.prs.length === 0
     Layout.leftMargin: 4
-    text: "Bu süzgeçte PR yok."
+    text: "No PRs match this filter."
     color: pr.theme.muted
     font.family: "Adwaita Sans"
     font.pixelSize: 13
@@ -263,8 +263,8 @@ ColumnLayout {
                 font.weight: Font.Bold
               }
               Text {
-                text: card.conflict ? "Çakışma var" : card.open ? "Birleştirilebilir"
-                  : card.modelData.state === "MERGED" ? "Birleştirildi" : "Kapatıldı"
+                text: card.conflict ? "Conflicts" : card.open ? "Mergeable"
+                  : card.modelData.state === "MERGED" ? "Merged" : "Closed"
                 color: card.stateColor
                 font.family: "Adwaita Sans"
                 font.pixelSize: 12
@@ -302,18 +302,18 @@ ColumnLayout {
                 font.pixelSize: 11
               }
               ChipButton {
-                theme: pr.theme; label: "󰖟"; tip: "Web'de aç"
+                theme: pr.theme; label: "󰖟"; tip: "Open in browser"
                 onClicked: { opener.command = ["xdg-open", card.modelData.url]; opener.startDetached() }
               }
               ChipButton {
                 visible: card.open
-                theme: pr.theme; label: "󰅖"; tip: "Reddet (kapat)"; ink: "#ff453a"
+                theme: pr.theme; label: "󰅖"; tip: "Reject (close)"; ink: "#ff453a"
                 onClicked: pr.act(["close", pr.repo, String(card.modelData.number)])
               }
               ChipButton {
                 visible: card.open
                 theme: pr.theme; label: "󰘭"
-                tip: card.conflict ? "Çakışma var, birleştirilemez" : "Birleştir (merge)"
+                tip: card.conflict ? "Has conflicts, cannot merge" : "Merge"
                 ink: card.conflict ? pr.theme.muted : "#30d158"
                 opacity: card.conflict ? 0.5 : 1
                 onClicked: if (!card.conflict) pr.act(["merge", pr.repo, String(card.modelData.number), "merge"])

@@ -8,7 +8,7 @@ import "../../../services/Modules.js" as Modules
 ColumnLayout {
   id: page
   required property var view
-  visible: view.currentPage === "Modüller"
+  visible: view.currentPage === "Modules"
   Layout.fillWidth: true
   spacing: 20
 
@@ -74,36 +74,36 @@ ColumnLayout {
   // Island'a tıklama düzeni ve saatin yeri (kısa kullanım notu).
   SettingsGroup {
     view: page.view
-    title: "Kullanım"
-    SettingsRow { view: page.view; label: "Sol tık"; detail: "Island'ın kendisi: kontrol merkezi (kota uyarısında uyarıyı kapatır)" }
-    SettingsRow { view: page.view; label: "Sağ tık"; detail: "Ana etkinliğin detayı (ajan/kota: limitler, müzik: oynatıcı); etkinlik yoksa takvim" }
-    SettingsRow { view: page.view; label: "Saat"; detail: "Saat, etkinlik varken island'ın sağında görünür" }
-    SettingsRow { view: page.view; label: "Kabarcığa tık"; detail: "Etkinliği ana island'a alır (sabitler)"; last: true }
+    title: "Usage"
+    SettingsRow { view: page.view; label: "Left click"; detail: "The island itself: control center (dismisses the alert on a quota warning)" }
+    SettingsRow { view: page.view; label: "Right click"; detail: "Details of the main activity (agent/quota: limits, music: player); the calendar if there is no activity" }
+    SettingsRow { view: page.view; label: "Clock"; detail: "The clock appears on the right of the island while an activity is shown" }
+    SettingsRow { view: page.view; label: "Click a bubble"; detail: "Moves that activity to the main island (pins it)"; last: true }
   }
 
   // Geliştirici canlı etkinliklerinin eşikleri.
   SettingsGroup {
     view: page.view
     visible: !!page.view.settings.aiQuota || !!page.view.settings.aiAgents
-    title: "Canlı Etkinlik Ayarları"
-    footer: "Kota uyarısı, kalan oran bu yüzdenin altına düşünce ana island'da bir kez görünür; tıklayınca ya da süre dolunca kapanır. Enter ile kaydedilir."
+    title: "Live Activity Settings"
+    footer: "The quota alert appears once on the main island when the remaining share drops below this percentage; it closes on click or when the time runs out. Press Enter to save."
     SettingsRow {
       view: page.view
       visible: !!page.view.settings.aiQuota
-      label: "Kota uyarı eşiği (% kalan)"
+      label: "Quota alert threshold (% left)"
       SayiAlani { anahtar: "aiQuotaWarnPercent"; enAz: 1; enCok: 99 }
     }
     SettingsRow {
       view: page.view
       visible: !!page.view.settings.aiQuota
-      label: "Kota uyarısı süresi (sn)"
+      label: "Quota alert duration (s)"
       last: !page.view.settings.aiAgents
       SayiAlani { anahtar: "aiQuotaAlertSeconds"; enAz: 5; enCok: 600 }
     }
     SettingsRow {
       view: page.view
       visible: !!page.view.settings.aiAgents
-      label: "\"Bitti\" banner süresi (sn)"
+      label: "\"Done\" banner duration (s)"
       last: true
       SayiAlani { anahtar: "agentDoneSeconds"; enAz: 1; enCok: 30 }
     }
@@ -113,11 +113,11 @@ ColumnLayout {
   SettingsGroup {
     view: page.view
     visible: !!page.view.settings.githubPrs
-    title: "GitHub Depoları"
-    footer: "Virgülle ayır, ör. sahip/depo, sahip/baska-depo. Enter ile kaydedilir."
+    title: "GitHub Repositories"
+    footer: "Separate with commas, e.g. owner/repo, owner/other-repo. Press Enter to save."
     SettingsRow {
       view: page.view
-      label: "Depolar"
+      label: "Repositories"
       last: true
       Rectangle {
         width: 300
@@ -131,7 +131,7 @@ ColumnLayout {
           anchors.leftMargin: 8
           anchors.verticalCenter: parent.verticalCenter
           visible: reposInput.text === ""
-          text: "sahip/depo"
+          text: "owner/repo"
           color: page.view.textMuted
           font.family: "Adwaita Sans"
           font.pixelSize: 13

@@ -94,7 +94,7 @@ ColumnLayout {
       Layout.preferredHeight: 32
       radius: 16
       color: calendarMouse.containsMouse ? cc.well : cc.card
-      Tooltip { theme: cc.host.theme; text: "Takvim" }
+      Tooltip { theme: cc.host.theme; text: "Calendar" }
       Text {
         anchors.centerIn: parent
         text: "󰃭"
@@ -116,7 +116,7 @@ ColumnLayout {
       Layout.preferredHeight: 32
       radius: 16
       color: devMouse.containsMouse ? cc.well : cc.card
-      Tooltip { theme: cc.host.theme; text: "Geliştirici" }
+      Tooltip { theme: cc.host.theme; text: "Developer" }
       Text {
         anchors.centerIn: parent
         text: "󰅩"

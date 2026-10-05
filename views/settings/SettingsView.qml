@@ -16,13 +16,13 @@ Item {
   readonly property var settings: host.settings
   property string currentPage: "General"
   property string searchQuery: ""
-  readonly property var pages: ["General", "Search", "Live Activities", "Notifications", "Modüller", "Keybinds"]
+  readonly property var pages: ["General", "Search", "Live Activities", "Notifications", "Modules", "Keybinds"]
   readonly property var pageInfo: ({
     "General": { icon: "󰒓", color: "#8e8e93", about: "Appearance, motion, and how the pill looks at rest." },
     "Search": { icon: "󰍉", color: "#5e7a99", about: "Get answers to launcher questions right in the island." },
     "Live Activities": { icon: "󰨚", color: "#34c759", about: "Choose what shows up on the pill while it's happening." },
     "Notifications": { icon: "󰂚", color: "#ff3b30", about: "How notification banners appear on the island." },
-    "Modüller": { icon: "󰏗", color: "#af52de", about: "İstemediğin özellikleri kapat. Değişiklik hemen uygulanır." },
+    "Modules": { icon: "󰏗", color: "#af52de", about: "Turn off features you do not want. Changes apply immediately." },
     "Keybinds": { icon: "󰌌", color: "#8e8e93", about: "Keyboard shortcuts that open each part of the island." }
   })
   function pageMatches(page) {
@@ -33,7 +33,7 @@ Item {
       "Search": "search ask with claude codex launcher answers",
       "Live Activities": "live activities now playing media cover sound wave clipboard downloads system updates battery charging low bluetooth devices volume hud workspace workspaces keyboard layout indicator languages",
       "Notifications": "notifications banner duration",
-      "Modüller": "modüller moduller modules özellikler geliştirici gelistirici developer ai kota claude antigravity github pr depo port docker takvim calendar",
+      "Modules": "modules features developer ai quota claude antigravity github pr repo port docker calendar",
       "Keybinds": "keybinds keybindings keyboard shortcuts keys"
     }
     return String(terms[page] || page).toLowerCase().indexOf(query) !== -1

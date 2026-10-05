@@ -57,24 +57,24 @@ ColumnLayout {
     theme: ai.theme
     glyph: ""; name: "Claude Code"; tint: "#d97757"
     note: "Opus " + ai.tokens(ai.stats.claude.opus) + " · Sonnet " + ai.tokens(ai.stats.claude.sonnet)
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#d97757"; label: "5 saatlik oturum"; percent: ai.stats.claude.session || 0 }
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#d97757"; label: "Haftalık kota"; percent: ai.stats.claude.weekly || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#d97757"; label: "5-hour session"; percent: ai.stats.claude.session || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#d97757"; label: "Weekly quota"; percent: ai.stats.claude.weekly || 0 }
   }
 
   ProviderCard {
     theme: ai.theme
     glyph: "󰫢"; name: "Antigravity"; tint: "#60a5fa"
     note: ai.stats.antigravity.burn || ""
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#60a5fa"; label: "Gemini · 5 saatlik oturum"; percent: ai.stats.antigravity.session || 0 }
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#60a5fa"; label: "Gemini · haftalık kota"; percent: ai.stats.antigravity.weekly || 0 }
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#f59e0b"; label: "Claude ve GPT · 5 saatlik oturum"; percent: ai.stats.antigravity.session3p || 0 }
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#f59e0b"; label: "Claude ve GPT · haftalık kota"; percent: ai.stats.antigravity.weekly3p || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#60a5fa"; label: "Gemini · 5-hour session"; percent: ai.stats.antigravity.session || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#60a5fa"; label: "Gemini · weekly quota"; percent: ai.stats.antigravity.weekly || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#f59e0b"; label: "Claude and GPT · 5-hour session"; percent: ai.stats.antigravity.session3p || 0 }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#f59e0b"; label: "Claude and GPT · weekly quota"; percent: ai.stats.antigravity.weekly3p || 0 }
   }
 
   ProviderCard {
     visible: ai.stats.codexSession > 0
     theme: ai.theme
     glyph: ""; name: "Codex"; tint: "#9ca3af"
-    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#9ca3af"; label: "5 saatlik oturum"; percent: ai.stats.codexSession }
+    QuotaBar { Layout.fillWidth: true; theme: ai.theme; tint: "#9ca3af"; label: "5-hour session"; percent: ai.stats.codexSession }
   }
 }

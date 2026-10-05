@@ -12,7 +12,7 @@ ColumnLayout {
   Text {
     visible: docker.stats.containers.length === 0
     Layout.leftMargin: 4
-    text: docker.stats.loaded ? "Docker konteyneri bulunamadı." : "Yükleniyor…"
+    text: docker.stats.loaded ? "No Docker containers found." : "Loading…"
     color: docker.theme.muted
     font.family: "Adwaita Sans"
     font.pixelSize: 13
@@ -40,7 +40,7 @@ ColumnLayout {
           spacing: 1
           Text {
             Layout.fillWidth: true
-            text: row.modelData.name || "Bilinmiyor"
+            text: row.modelData.name || "Unknown"
             elide: Text.ElideRight
             color: docker.theme.text
             font.family: "Adwaita Sans"
@@ -57,13 +57,13 @@ ColumnLayout {
           }
         }
         ChipButton {
-          theme: docker.theme; label: "󰑐"; tip: "Yeniden başlat"
+          theme: docker.theme; label: "󰑐"; tip: "Restart"
           onClicked: docker.stats.run(["docker", "restart", row.modelData.name])
         }
         ChipButton {
           theme: docker.theme
           label: row.running ? "󰓛" : "󰐊"
-          tip: row.running ? "Durdur" : "Başlat"
+          tip: row.running ? "Stop" : "Start"
           ink: row.running ? "#ff453a" : "#30d158"
           onClicked: docker.stats.run(["docker", row.running ? "stop" : "start", row.modelData.name])
         }
