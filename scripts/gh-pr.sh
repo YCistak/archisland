@@ -57,16 +57,16 @@ case "$cmd" in
     pr_num="$3"
     method="${4:-merge}"
     if [[ -z "$pr_num" ]]; then
-      echo '{"success":false,"error":"PR numarası belirtilmedi"}'
+      echo '{"success":false,"error":"PR number not specified"}'
       exit 1
     fi
     out=$(gh pr merge "$pr_num" -R "$repo" --"$method" 2>&1)
     status=$?
     if [[ $status -eq 0 ]]; then
-      notify-send -u normal "ArchIsland - GitHub" "PR #$pr_num ($repo) başarıyla birleştirildi!" -i git 2>/dev/null || true
-      echo "{\"success\":true,\"message\":\"PR #$pr_num birleştirildi.\"}"
+      notify-send -u normal "ArchIsland - GitHub" "PR #$pr_num ($repo) merged successfully!" -i git 2>/dev/null || true
+      echo "{\"success\":true,\"message\":\"PR #$pr_num merged.\"}"
     else
-      notify-send -u critical "ArchIsland - GitHub" "PR #$pr_num birleştirilemedi: $out" -i dialog-error 2>/dev/null || true
+      notify-send -u critical "ArchIsland - GitHub" "PR #$pr_num could not be merged: $out" -i dialog-error 2>/dev/null || true
       jq -n --arg err "$out" '{"success":false,"error":$err}'
     fi
     ;;
@@ -74,16 +74,16 @@ case "$cmd" in
   close)
     pr_num="$3"
     if [[ -z "$pr_num" ]]; then
-      echo '{"success":false,"error":"PR numarası belirtilmedi"}'
+      echo '{"success":false,"error":"PR number not specified"}'
       exit 1
     fi
     out=$(gh pr close "$pr_num" -R "$repo" 2>&1)
     status=$?
     if [[ $status -eq 0 ]]; then
-      notify-send -u normal "ArchIsland - GitHub" "PR #$pr_num ($repo) kapatıldı." -i git 2>/dev/null || true
-      echo "{\"success\":true,\"message\":\"PR #$pr_num kapatıldı.\"}"
+      notify-send -u normal "ArchIsland - GitHub" "PR #$pr_num ($repo) closed." -i git 2>/dev/null || true
+      echo "{\"success\":true,\"message\":\"PR #$pr_num closed.\"}"
     else
-      notify-send -u critical "ArchIsland - GitHub" "PR #$pr_num kapatılamadı: $out" -i dialog-error 2>/dev/null || true
+      notify-send -u critical "ArchIsland - GitHub" "PR #$pr_num could not be closed: $out" -i dialog-error 2>/dev/null || true
       jq -n --arg err "$out" '{"success":false,"error":$err}'
     fi
     ;;
@@ -92,9 +92,9 @@ case "$cmd" in
     head_branch="$3"
     base_branch="${4:-}"
     title="$5"
-    body="${6:-ArchIsland üzerinden oluşturuldu.}"
+    body="${6:-Created from ArchIsland.}"
     if [[ -z "$head_branch" || -z "$title" ]]; then
-      echo '{"success":false,"error":"Dal ve başlık belirtilmedi"}'
+      echo '{"success":false,"error":"Branch and title not specified"}'
       exit 1
     fi
     # Hedef dal boşsa gh deponun varsayılan dalını kullanır.
@@ -104,10 +104,10 @@ case "$cmd" in
     status=$?
     if [[ $status -eq 0 ]]; then
       url=$(echo "$out" | grep -o 'https://github.com/[^ ]*' | head -n1)
-      notify-send -u normal "ArchIsland - GitHub" "Yeni PR başarıyla açıldı: $title ($url)" -i git 2>/dev/null || true
-      jq -n --arg u "$url" '{"success":true,"url":$u,"message":"PR başarıyla açıldı"}'
+      notify-send -u normal "ArchIsland - GitHub" "New PR opened successfully: $title ($url)" -i git 2>/dev/null || true
+      jq -n --arg u "$url" '{"success":true,"url":$u,"message":"PR opened successfully"}'
     else
-      notify-send -u critical "ArchIsland - GitHub" "PR açılamadı: $out" -i dialog-error 2>/dev/null || true
+      notify-send -u critical "ArchIsland - GitHub" "Could not open PR: $out" -i dialog-error 2>/dev/null || true
       jq -n --arg err "$out" '{"success":false,"error":$err}'
     fi
     ;;
@@ -124,7 +124,7 @@ case "$cmd" in
     ;;
 
   *)
-    echo "Kullanım: $0 {summary|list|branches|merge|close|create|view-web|diff} [repo] [args...]"
+    echo "Usage: $0 {summary|list|branches|merge|close|create|view-web|diff} [repo] [args...]"
     exit 1
     ;;
 esac

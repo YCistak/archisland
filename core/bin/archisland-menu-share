@@ -16,7 +16,7 @@ shift
 
 # LocalSend kurulu mu kontrol et
 if ! command -v localsend >/dev/null 2>&1; then
-  archisland-notification-send -g "" -u critical "LocalSend Kurulu Değil" "Dosya paylaşımı için LocalSend gereklidir.\nKurmak için: sudo pacman -S localsend"
+  archisland-notification-send -g "" -u critical "LocalSend Not Installed" "LocalSend is required for file sharing.\nTo install: sudo pacman -S localsend"
   exit 1
 fi
 
@@ -32,7 +32,7 @@ if [[ $MODE == "clipboard" ]]; then
   TEMP_FILE=$(mktemp --suffix=.txt)
   wl-paste >"$TEMP_FILE" 2>/dev/null || true
   if [[ ! -s "$TEMP_FILE" ]]; then
-    archisland-notification-send -g "" -u low "Pano Boş" "Paylaşılacak metin bulunamadı."
+    archisland-notification-send -g "" -u low "Clipboard Empty" "No text found to share."
     rm -f "$TEMP_FILE"
     exit 0
   fi
@@ -52,7 +52,7 @@ else
   picked=$(archisland-file-select "${select_args[@]}") || status=$?
 
   if ((${status:-0} > 1)); then
-    archisland-notification-send -g "" -u critical "Paylaşım Başarısız" "Dosya seçici açılamadı"
+    archisland-notification-send -g "" -u critical "Share Failed" "Could not open the file picker"
     exit 1
   fi
 

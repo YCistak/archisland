@@ -12,34 +12,34 @@ SCRIPTS_DIR="$CONFIG_DIR/scripts"
 BIN_DIR="$HOME/.local/bin"
 ISLAND_JSON="$CONFIG_DIR/island.json"
 
-# Geliştirici paketi: --gelistirici açar, --sade kapatır. Bayrak yoksa ve
+# Geliştirici paketi: --developer açar, --minimal kapatır. Bayrak yoksa ve
 # terminal etkileşimliyse sorulur; değilse mevcut ayara dokunulmaz.
 GELISTIRICI=""
 AJAN_KANCALARI=false
 for arg in "$@"; do
   case "$arg" in
-    --gelistirici) GELISTIRICI=true ;;
-    --sade) GELISTIRICI=false ;;
-    --ajan-kancalari) AJAN_KANCALARI=true ;;
+    --developer) GELISTIRICI=true ;;
+    --minimal) GELISTIRICI=false ;;
+    --agent-hooks) AJAN_KANCALARI=true ;;
     -h|--help)
-      echo "Kullanım: bash install.sh [--gelistirici | --sade] [--ajan-kancalari]"
-      echo "  --gelistirici     Geliştirici paketini aç (AI kota, ajan durumu, GitHub PR, portlar, Docker)"
-      echo "  --sade            Geliştirici paketini kapat"
-      echo "  --ajan-kancalari  Claude Code / Codex / Antigravity kancalarını ekle (mevcut kancalar korunur, önce .bak alınır)"
+      echo "Usage: bash install.sh [--developer | --minimal] [--agent-hooks]"
+      echo "  --developer     Enable the Developer Pack (AI quota, agent status, GitHub PRs, ports, Docker)"
+      echo "  --minimal       Disable the Developer Pack"
+      echo "  --agent-hooks   Add Claude Code / Codex / Antigravity hooks (existing hooks are kept, a .bak is made first)"
       exit 0 ;;
-    *) echo "Bilinmeyen seçenek: $arg (yardım: --help)" >&2; exit 1 ;;
+    *) echo "Unknown option: $arg (help: --help)" >&2; exit 1 ;;
   esac
 done
 
 for dep in quickshell rsync jq; do
-  command -v "$dep" >/dev/null 2>&1 || { echo "Eksik bağımlılık: $dep" >&2; exit 1; }
+  command -v "$dep" >/dev/null 2>&1 || { echo "Missing dependency: $dep" >&2; exit 1; }
 done
 
-echo "==> ArchIsland kuruluyor..."
+echo "==> Installing ArchIsland..."
 mkdir -p "$CORE_DIR" "$PLUGINS_DIR" "$SCRIPTS_DIR" "$BIN_DIR"
 
 # 1. Shell çekirdeği (QML shell, yardımcı komutlar, varsayılan dosyalar)
-echo "==> Çekirdek: $CORE_DIR"
+echo "==> Core: $CORE_DIR"
 rsync -a --delete "$HERE/core/" "$CORE_DIR/"
 
 # Simge fontu (menüdeki uygulama logoları)
@@ -48,7 +48,7 @@ install -m 644 "$HERE/core/default/fonts/archisland/archisland.ttf" "$HOME/.loca
 fc-cache -f "$HOME/.local/share/fonts" >/dev/null 2>&1 || true
 
 # 2. Island eklentisi
-echo "==> Island eklentisi: $PLUGINS_DIR/guilhermerisu.island"
+echo "==> Island plugin: $PLUGINS_DIR/guilhermerisu.island"
 rsync -a --delete \
   --exclude '.git' --exclude 'core' --exclude '__pycache__' \
   "$HERE/" "$PLUGINS_DIR/guilhermerisu.island/"
@@ -70,10 +70,10 @@ fi
 
 # 4b. Geliştirici paketi tercihi (island.json ezilmez, jq ile birleştirilir)
 if [[ -z $GELISTIRICI && -t 0 ]]; then
-  read -r -p "Geliştirici paketi (AI kota, ajan durumu, GitHub PR, portlar, Docker) kurulsun mu? [e/H] " cevap || cevap=""
+  read -r -p "Install the Developer Pack (AI quota, agent status, GitHub PRs, ports, Docker)? [y/N] " cevap || cevap=""
   case "${cevap,,}" in
-    e|evet|y|yes) GELISTIRICI=true ;;
-    h|hayir|hayır|n|no) GELISTIRICI=false ;;
+    y|yes) GELISTIRICI=true ;;
+    n|no) GELISTIRICI=false ;;
     # Boş cevap: ayar zaten varsa koru, yoksa kapalı.
     *) if [[ -f $ISLAND_JSON ]] && jq -e 'has("aiQuota")' "$ISLAND_JSON" >/dev/null 2>&1; then
          GELISTIRICI=""
@@ -91,17 +91,17 @@ if [[ -n $GELISTIRICI ]]; then
       mv "$tmp" "$ISLAND_JSON"
     else
       rm -f "$tmp"
-      echo "==> Uyarı: $ISLAND_JSON okunamadı, geliştirici paketi ayarı yazılmadı." >&2
+      echo "==> Warning: could not read $ISLAND_JSON, Developer Pack setting not written." >&2
     fi
   else
     echo "$ek" >"$ISLAND_JSON"
   fi
-  [[ $GELISTIRICI == true ]] && durum="açık" || durum="kapalı"
-  echo "==> Geliştirici paketi: $durum (Ayarlar → Modüller'den değiştirilebilir)"
+  [[ $GELISTIRICI == true ]] && durum="on" || durum="off"
+  echo "==> Developer Pack: $durum (can be changed in Settings → Modules)"
 fi
 
 # 5. Island betikleri ve `island` komutu
-echo "==> Betikler: $SCRIPTS_DIR"
+echo "==> Scripts: $SCRIPTS_DIR"
 rsync -a --exclude '__pycache__' "$HERE/scripts/" "$SCRIPTS_DIR/"
 chmod +x "$SCRIPTS_DIR"/*
 install -m 755 "$HERE/bin/island" "$BIN_DIR/island"
@@ -115,7 +115,7 @@ for cmd in "$CORE_DIR/bin"/archisland-*; do
 done
 
 # 5b. Ajan kancası betiği (her zaman kopyalanır; ajan ayarlarına yalnız
-# --ajan-kancalari ile yazılır).
+# --agent-hooks ile yazılır).
 HOOKS_DIR="$CONFIG_DIR/hooks"
 mkdir -p "$HOOKS_DIR"
 install -m 755 "$HERE/hooks/ajan-kanca.sh" "$HOOKS_DIR/ajan-kanca.sh"
@@ -135,10 +135,10 @@ json_birlestir() {
   if sed "s|__KANCA__|$KANCA|g" "$ornek" | jq --slurpfile ek /dev/stdin "$suzgec" "$dosya" >"$tmp"; then
     cat "$tmp" >"$dosya"
     rm -f "$tmp"
-    echo "==> Kancalar eklendi: $dosya (yedek: $dosya.bak)"
+    echo "==> Hooks added: $dosya (backup: $dosya.bak)"
   else
     rm -f "$tmp"
-    echo "==> Uyarı: $dosya okunamadı, kancalar eklenmedi." >&2
+    echo "==> Warning: could not read $dosya, hooks not added." >&2
   fi
 }
 # Claude Code ve Codex: olay → [{matcher?, hooks: [...]}]. Önce bizim eski
@@ -153,7 +153,7 @@ if [[ $AJAN_KANCALARI == true ]]; then
   json_birlestir "$HOME/.claude/settings.json" "$HERE/hooks/claude-settings.json" "$OLAY_SUZGECI"
   if [[ -d $HOME/.codex ]]; then
     json_birlestir "$HOME/.codex/hooks.json" "$HERE/hooks/codex-hooks.json" "$OLAY_SUZGECI"
-    echo "    Not: Codex yeni kancaları ilk açılışta onaylamanı isteyebilir."
+    echo "    Note: Codex may ask you to approve the new hooks on first launch."
   fi
   # Antigravity CLI (agy): ~/.gemini/config/hooks.json, adlandırılmış gruplar.
   if command -v agy >/dev/null 2>&1 && [[ -d $HOME/.gemini ]]; then
@@ -162,16 +162,16 @@ if [[ $AJAN_KANCALARI == true ]]; then
 fi
 
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-  echo "==> Not: $BIN_DIR PATH içinde olmalı."
+  echo "==> Note: $BIN_DIR must be in your PATH."
 fi
 
 # 6. Çalışıyorsa yeniden başlat
 if pgrep -f "^quickshell -n -p $CORE_DIR/shell" >/dev/null 2>&1; then
-  echo "==> Island yeniden başlatılıyor..."
+  echo "==> Restarting Island..."
   "$BIN_DIR/island" restart || true
 fi
 
-echo "==> ArchIsland kuruldu."
-echo "    Hyprland açılışında: exec /home/\$USER/.local/bin/island start"
-echo "    Komutlar: island toggle | menu | apps | power | calendar | stats | ports"
+echo "==> ArchIsland installed."
+echo "    On Hyprland startup: exec /home/\$USER/.local/bin/island start"
+echo "    Commands: island toggle | menu | apps | power | calendar | stats | ports"
 echo "              island kill-port <P> | pr | save-session | restore-session | restart"

@@ -160,7 +160,7 @@ Rectangle {
         font.pixelSize: 11
       }
       Text {
-        text: "󰑐  Yenile"
+        text: "󰑐  Refresh"
         color: refreshMouse.containsMouse ? agenda.theme.text : agenda.theme.muted
         font.family: agenda.theme.fontFamily
         font.pixelSize: 11

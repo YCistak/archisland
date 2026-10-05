@@ -22,13 +22,13 @@
   // Ana Menü Girdileri
   "dev": {
     "icon": "",
-    "label": "Geliştirici & AI Kota",
+    "label": "Developer & AI Quota",
     "aliases": ["dev", "island-dev", "developer"],
     "action": "/home/asaf/.local/bin/island show dev"
   },
   "ocr": {
     "icon": "󰴑",
-    "label": "OCR & Ekran Çeviri",
+    "label": "OCR & Screen Translate",
     "aliases": ["ocr", "ocr-translate", "translate"],
     "action": "ocr-translate"
   },

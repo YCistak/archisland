@@ -43,18 +43,18 @@ def save_session() -> int:
         })
     with open(SESSION_FILE, "w", encoding="utf-8") as f:
         json.dump(saved, f, indent=2, ensure_ascii=False)
-    print(f"ArchIsland: {len(saved)} pencere kaydedildi -> {SESSION_FILE}")
+    print(f"ArchIsland: {len(saved)} windows saved -> {SESSION_FILE}")
     return len(saved)
 
 def restore_session() -> int:
     if not SESSION_FILE.exists():
-        print(f"ArchIsland: Kayıtlı oturum dosyası bulunamadı ({SESSION_FILE})")
+        print(f"ArchIsland: No saved session file found ({SESSION_FILE})")
         return 0
     try:
         with open(SESSION_FILE, "r", encoding="utf-8") as f:
             windows = json.load(f)
     except Exception as e:
-        sys.stderr.write(f"Dosya okuma hatası: {e}\n")
+        sys.stderr.write(f"File read error: {e}\n")
         return 0
 
     restored = 0
@@ -80,7 +80,7 @@ def restore_session() -> int:
             restored += 1
         except Exception:
             pass
-    print(f"ArchIsland: {restored} uygulama geri yüklendi.")
+    print(f"ArchIsland: {restored} apps restored.")
     return restored
 
 if __name__ == "__main__":

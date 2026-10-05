@@ -130,14 +130,14 @@ Rectangle {
     enabled: bubble.shown
     hoverEnabled: bubble.host.settings.debugInput
     preventStealing: true
-    onEntered: bubble.host.girdiLog("kabarcık " + bubble.kimlik + " üzerine gelindi " + bubble.host.sahneDikdortgen(bubble))
+    onEntered: bubble.host.girdiLog("bubble " + bubble.kimlik + " hovered " + bubble.host.sahneDikdortgen(bubble))
     onPressed: function(mouse) {
-      bubble.host.girdiLog("kabarcık " + bubble.kimlik + " basış (sıra " + bubble.sira + ") " + bubble.host.sahneDikdortgen(bubble))
+      bubble.host.girdiLog("bubble " + bubble.kimlik + " press (index " + bubble.sira + ") " + bubble.host.sahneDikdortgen(bubble))
     }
-    onCanceled: bubble.host.girdiLog("kabarcık " + bubble.kimlik + " basış iptal")
+    onCanceled: bubble.host.girdiLog("bubble " + bubble.kimlik + " press canceled")
     onClicked: {
       var sonuc = bubble.host.live.degistir(bubble.kimlik)
-      bubble.host.girdiLog("kabarcık " + bubble.kimlik + " tık → degistir: " + sonuc)
+      bubble.host.girdiLog("bubble " + bubble.kimlik + " click → swap: " + sonuc)
     }
   }
 }

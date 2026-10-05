@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# ArchIsland demo: animasyonları terminalden izlemek için senaryolar.
-# Kullanım: island demo [senaryo]
+# ArchIsland demo: scenarios for watching the animations from the terminal.
+# Usage: island demo [scenario]
 set -uo pipefail
 
 ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"
@@ -15,17 +15,17 @@ bekle() { sleep "${1:-3}"; }
 
 kullanim() {
   cat <<'KUL'
-Kullanım: island demo [senaryo]
+Usage: island demo [scenario]
 
-Senaryolar:
-  ajan       Ajan çalışıyor → 2 ajan → onay bekliyor → bitti (limit kartı)
-  baloncuk   İki ajan: ana island + baloncuk, ardından yer değiştirme (swap)
-  tiklama    Sol tık (kontrol merkezi) ve sağ tık (etkinlik detayı)
-  kota       Kota uyarısı: süre dolunca kapanır, tıklayınca kapanır
-  masaustu   Pencereli masaüstleri ve boş bir masaüstü arasında geçiş
-  hepsi      Hepsini sırayla çalıştırır
+Scenarios:
+  agent      Agent working → 2 agents → needs approval → done (limit card)
+  bubbles    Two agents: main island + bubble, then swapping places
+  clicks     Left click (control center) and right click (activity details)
+  quota      Quota alert: closes when time runs out, closes on click
+  workspaces Switching between workspaces with windows and an empty workspace
+  all        Runs everything in order
 
-Ctrl+C ile kesilirse demo oturumları ve ayarlar eski hâline döner.
+If interrupted with Ctrl+C, demo sessions and settings are restored.
 KUL
 }
 
@@ -62,7 +62,7 @@ kotayi_geri_yukle() {
     rm -f "$KAYIT"
   fi
   KOTA_DEGISTI=0
-  echo "Ayarlar eski hâline döndü."
+  echo "Settings restored."
 }
 
 temizle() {
@@ -76,79 +76,79 @@ temizle() {
   fi
   rm -rf "$YEDEK"
 }
-kes() { echo; echo "Kesildi, temizleniyor…"; exit 130; }
+kes() { echo; echo "Interrupted, cleaning up…"; exit 130; }
 trap temizle EXIT
 trap kes INT TERM
 
 # --- Senaryolar -------------------------------------------------------------
-s_ajan() {
-  adim "Claude çalışıyor…"; ada agent claude working demo-1; bekle 4
-  adim "İkinci oturum başladı (2 ajan)…"; ada agent claude working demo-2; bekle 4
-  adim "Claude onay bekliyor…"; ada agent claude waiting demo-1; bekle 4
-  adim "Bir oturum bitti (limit kartı)…"; ada agent claude done demo-1; bekle 4
-  adim "Temizleniyor…"; ajanlari_temizle; bekle 2
+s_agent() {
+  adim "Claude working…"; ada agent claude working demo-1; bekle 4
+  adim "Second session started (2 agents)…"; ada agent claude working demo-2; bekle 4
+  adim "Claude needs approval…"; ada agent claude waiting demo-1; bekle 4
+  adim "A session finished (limit card)…"; ada agent claude done demo-1; bekle 4
+  adim "Cleaning up…"; ajanlari_temizle; bekle 2
 }
 
-s_baloncuk() {
-  adim "Claude çalışıyor (ana island)…"; ada agent claude working demo-1; bekle 3
-  adim "Antigravity de çalışıyor (iki baloncuk)…"; ada agent agy working demo-2; bekle 4
-  adim "Baloncuk 0 ile yer değiştir…"; ada swap 0; bekle 4
-  adim "Baloncuk 1 ile yer değiştir…"; ada swap 1; bekle 4
-  adim "Temizleniyor…"; ajanlari_temizle; bekle 2
+s_bubbles() {
+  adim "Claude working (main island)…"; ada agent claude working demo-1; bekle 3
+  adim "Antigravity is working too (two bubbles)…"; ada agent agy working demo-2; bekle 4
+  adim "Swapping with bubble 0…"; ada swap 0; bekle 4
+  adim "Swapping with bubble 1…"; ada swap 1; bekle 4
+  adim "Cleaning up…"; ajanlari_temizle; bekle 2
 }
 
-s_tiklama() {
-  adim "Claude çalışıyor…"; ada agent claude working demo-1; bekle 3
-  adim "Sol tık: kontrol merkezi açılıyor…"; ada click left; bekle 4
-  adim "Kapatılıyor…"; ada close; bekle 2
-  adim "Sağ tık: etkinlik detayı açılıyor…"; ada click right; bekle 4
-  adim "Kapatılıyor…"; ada close; bekle 2
-  adim "Temizleniyor…"; ajanlari_temizle; bekle 2
+s_clicks() {
+  adim "Claude working…"; ada agent claude working demo-1; bekle 3
+  adim "Left click: opening the control center…"; ada click left; bekle 4
+  adim "Closing…"; ada close; bekle 2
+  adim "Right click: opening activity details…"; ada click right; bekle 4
+  adim "Closing…"; ada close; bekle 2
+  adim "Cleaning up…"; ajanlari_temizle; bekle 2
 }
 
-s_kota() {
-  if [[ ! -f $AYAR ]]; then echo "island.json bulunamadı, kota senaryosu atlandı." >&2; return 1; fi
+s_quota() {
+  if [[ ! -f $AYAR ]]; then echo "island.json not found, quota scenario skipped." >&2; return 1; fi
   cp -p "$AYAR" "$YEDEK/island.json"; AYAR_YEDEK_VAR=1
   if [[ -f $KAYIT ]]; then cp -p "$KAYIT" "$YEDEK/ai-quota-shown.json"; KAYIT_YEDEK_VAR=1; fi
   jq -e 'has("aiQuotaWarnPercent") and has("aiQuotaAlertSeconds")' "$AYAR" >/dev/null 2>&1 \
     && ANAHTARLAR_VARDI=1 || ANAHTARLAR_VARDI=0
   KOTA_DEGISTI=1
 
-  adim "Eşik %99, uyarı süresi 8 sn yapılıyor; gösterildi kaydı sıfırlanıyor…"
+  adim "Setting threshold to 99% and alert duration to 8 s; resetting the shown record…"
   echo '{}' >"$KAYIT"
   jq '. + {aiQuotaWarnPercent: 99, aiQuotaAlertSeconds: 8}' "$YEDEK/island.json" >"$AYAR.demo.tmp" \
     && mv "$AYAR.demo.tmp" "$AYAR"
   bekle 3
-  adim "Kota uyarısı bekleniyor, 8 sn sonra kendiliğinden kapanır…"; bekle 11
-  adim "Kayıt sıfırlanıyor; uyarı bir kez daha gösterilecek…"
+  adim "Waiting for the quota alert; it closes by itself after 8 s…"; bekle 11
+  adim "Resetting the record; the alert will show once more…"
   echo '{}' >"$KAYIT"; bekle 4
-  adim "Uyarıya tıklanmış gibi kapatılıyor (dismiss)…"; ada dismiss; bekle 3
-  adim "Ayarlar geri yükleniyor…"; kotayi_geri_yukle; bekle 2
+  adim "Dismissing as if the alert was clicked (dismiss)…"; ada dismiss; bekle 3
+  adim "Restoring settings…"; kotayi_geri_yukle; bekle 2
 }
 
-s_masaustu() {
-  command -v hyprctl >/dev/null || { echo "hyprctl yok, masaüstü senaryosu atlandı." >&2; return 1; }
+s_workspaces() {
+  command -v hyprctl >/dev/null || { echo "hyprctl not found, workspaces scenario skipped." >&2; return 1; }
   [[ -n $BASLANGIC_MD ]] || BASLANGIC_MD="$(hyprctl activeworkspace -j | jq -r '.id')"
   local dolu bos=9 hedef
   mapfile -t dolu < <(hyprctl workspaces -j | jq -r '[.[]|select(.id>0 and .windows>0)|.id]|sort|.[]' | head -3)
   while hyprctl workspaces -j | jq -e --argjson b "$bos" '.[]|select(.id==$b and .windows>0)' >/dev/null; do bos=$((bos+1)); done
-  adim "Başlangıç masaüstü: $BASLANGIC_MD"
+  adim "Starting workspace: $BASLANGIC_MD"
   for hedef in "${dolu[@]}" "$bos"; do
-    if [[ $hedef == "$bos" ]]; then adim "Boş masaüstü $hedef…"; else adim "Masaüstü $hedef…"; fi
+    if [[ $hedef == "$bos" ]]; then adim "Empty workspace $hedef…"; else adim "Workspace $hedef…"; fi
     hyprctl dispatch "hl.dsp.focus({ workspace = $hedef })" >/dev/null 2>&1; bekle 2.5
   done
-  adim "Başlangıca dönülüyor: $BASLANGIC_MD"
+  adim "Returning to start: $BASLANGIC_MD"
   hyprctl dispatch "hl.dsp.focus({ workspace = $BASLANGIC_MD })" >/dev/null 2>&1; bekle 2
 }
 
-s_hepsi() { s_ajan; s_baloncuk; s_tiklama; s_kota; s_masaustu; }
+s_all() { s_agent; s_bubbles; s_clicks; s_quota; s_workspaces; }
 
 # --- Giriş ------------------------------------------------------------------
 case "${1:-}" in
-  "" | -h | --help | yardim) kullanim ;;
-  ajan | baloncuk | tiklama | kota | masaustu | hepsi)
+  "" | -h | --help | help) kullanim ;;
+  agent | bubbles | clicks | quota | workspaces | all)
     command -v hyprctl >/dev/null && BASLANGIC_MD="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty')"
     "s_$1"
     ;;
-  *) echo "Bilinmeyen senaryo: $1" >&2; echo >&2; kullanim >&2; exit 1 ;;
+  *) echo "Unknown scenario: $1" >&2; echo >&2; kullanim >&2; exit 1 ;;
 esac

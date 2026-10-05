@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bekleyen paket güncellemelerini listeler; güncelleme yoksa 1 ile çıkar.
+# Lists pending package updates; exits with 1 when there are none.
 set -uo pipefail
 updates=$( { checkupdates --nocolor 2>/dev/null; command -v paru >/dev/null && paru -Qua 2>/dev/null; } | sed '/^$/d')
 if [[ -n $updates ]]; then

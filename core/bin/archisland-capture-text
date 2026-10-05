@@ -21,9 +21,9 @@ SELECTION=$(slurp 2>/dev/null)
 TEXT=$(grim -g "$SELECTION" - | tesseract stdin stdout --oem 1 --psm 6 -l "${ARCHISLAND_OCR_LANGS:-tur+eng}" --dpi 300 -c preserve_interword_spaces=1 2>/dev/null) || true
 
 if [[ -z $TEXT ]]; then
-  archisland-notification-send -u critical -g 󰴑 "Metin bulunamadı" "Seçilen alanda okunabilir metin tespit edilemedi"
+  archisland-notification-send -u critical -g 󰴑 "No text found" "No readable text was detected in the selected area"
   exit 1
 fi
 
 printf "%s" "$TEXT" | wl-copy
-archisland-notification-send -g 󰴑 "Metin Panoya Kopyalandı" "$TEXT"
+archisland-notification-send -g 󰴑 "Text Copied to Clipboard" "$TEXT"

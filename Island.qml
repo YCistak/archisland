@@ -550,10 +550,10 @@ Item {
     }
     // Island'a tıklama (fareyle aynı işlev): "left" ya da "right".
     function currentActivity(): string {
-      return (root.live.anaEtkinlik ? root.live.anaEtkinlik.id : "none") + " (sabit=" + root.live.sabit + ", ana=" + root.live.ana + ")"
+      return (root.live.anaEtkinlik ? root.live.anaEtkinlik.id : "none") + " (pinned=" + root.live.sabit + ", main=" + root.live.ana + ")"
     }
     function click(button: string): string {
-      if (button !== "left" && button !== "right") return "hata: left|right"
+      if (button !== "left" && button !== "right") return "error: left|right"
       root.islandClick(button === "right")
       return root.view
     }
@@ -561,7 +561,7 @@ Item {
     function dismiss(): string {
       var vardi = !!root.aiQuota.alarm
       root.aiQuota.kapat()
-      return vardi ? "kapandi" : "uyari yok"
+      return vardi ? "dismissed" : "no alert"
     }
   }
 
@@ -637,7 +637,7 @@ Item {
           z: -1
           enabled: root.settings.debugInput && !root.closesOnOutsideClick
           onPressed: function(mouse) {
-            root.girdiLog("sahipsiz basış " + Math.round(mouse.x) + "," + Math.round(mouse.y) + " | " + root.girisBolgeleri())
+            root.girdiLog("orphan press " + Math.round(mouse.x) + "," + Math.round(mouse.y) + " | " + root.girisBolgeleri())
             mouse.accepted = false
           }
         }
@@ -651,7 +651,7 @@ Item {
           // Maskedeki kabarcık bölgelerinin kendisi (boş olanlar yazılmaz).
           var m = [maskKb0, maskKb1, maskKb2, maskKb3]
           for (var j = 0; j < m.length; j++)
-            if (m[j].width > 0) r += " maske" + j + "=" + m[j].x + "," + m[j].y + " " + m[j].width + "x" + m[j].height
+            if (m[j].width > 0) r += " mask" + j + "=" + m[j].x + "," + m[j].y + " " + m[j].width + "x" + m[j].height
           return r
         }
         Component.onCompleted: if (visible) root.girisBolgeleri = bolgeler
@@ -663,7 +663,7 @@ Item {
           acceptedButtons: Qt.AllButtons
           // Clicks on the island's blank space fall through to here too.
           onPressed: function(mouse) {
-            root.girdiLog("dış alan basış " + Math.round(mouse.x) + "," + Math.round(mouse.y))
+            root.girdiLog("outside press " + Math.round(mouse.x) + "," + Math.round(mouse.y))
             if (!island.contains(mapToItem(island, mouse.x, mouse.y))) root.view = "rest"
           }
         }
@@ -785,7 +785,7 @@ Item {
             enabled: root.view === "rest" || root.view === "feedback"
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onPressed: function(mouse) {
-              root.girdiLog("island basış " + (mouse.button === Qt.RightButton ? "sağ" : "sol")
+              root.girdiLog("island press " + (mouse.button === Qt.RightButton ? "right" : "left")
                 + " " + root.sahneDikdortgen(island))
             }
             onClicked: function(mouse) { root.islandClick(mouse.button === Qt.RightButton) }

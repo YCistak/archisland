@@ -1,5 +1,5 @@
 #!/bin/bash
-# Sistem paketlerini günceller (paru varsa AUR dahil, yoksa pacman).
+# Updates system packages (includes AUR when paru is available, otherwise pacman).
 set -e
 [[ ${1:-} == "-y" ]] && noconfirm=--noconfirm || noconfirm=
 if command -v paru >/dev/null 2>&1; then

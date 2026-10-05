@@ -78,7 +78,7 @@ def main():
                 "summary": summary
             })
             save_events(events)
-            print(json.dumps({"status": "ok", "message": "Etkinlik eklendi"}))
+            print(json.dumps({"status": "ok", "message": "Event added"}))
             return
 
     # 2. Action: delete event
@@ -87,7 +87,7 @@ def main():
         events = load_events()
         events = [e for e in events if e.get("id") != target_id and e.get("summary") != target_id]
         save_events(events)
-        print(json.dumps({"status": "ok", "message": "Etkinlik silindi"}))
+        print(json.dumps({"status": "ok", "message": "Event deleted"}))
         return
 
     # 3. Action: set ical url
@@ -95,7 +95,7 @@ def main():
         url = sys.argv[2].strip()
         with open(URL_FILE, "w", encoding="utf-8") as f:
             f.write(url + "\n")
-        print(json.dumps({"status": "ok", "message": "URL kaydedildi"}))
+        print(json.dumps({"status": "ok", "message": "URL saved"}))
         return
 
     # Normal list / sync

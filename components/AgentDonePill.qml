@@ -46,7 +46,7 @@ LivePill {
     anchors.right: pill.cubuklu ? bars.left : parent.right
     anchors.rightMargin: 16
     anchors.verticalCenter: parent.verticalCenter
-    text: pill.ad + " · bitti ✓"
+    text: pill.ad + " · done ✓"
     textFormat: Text.PlainText
     elide: Text.ElideRight
     color: "#e2e6de"
