@@ -5,11 +5,14 @@ proposals are welcome.
 
 ## Before you start
 
-Island targets ArchIsland 4 and runs inside its Quickshell shell. Use a current
-ArchIsland installation for visual and runtime checks. The root `manifest.json`
+Island runs inside the ArchIsland Quickshell shell, a copy of which is bundled
+under `core/`. Use a working ArchIsland installation for visual and runtime checks. The root `manifest.json`
 defines the bar plugin; `companion/guilhermerisu.notifications/` contains the
-separate notification service. Keep their IDs and entry points consistent with
-the QML and shell commands that refer to them.
+separate notification service. The plugin IDs (`guilhermerisu.island`,
+`guilhermerisu.notifications`) are inherited from the original project and are
+used by `install.sh`, `bin/island`, the QML IPC target and the companion scripts;
+do not rename them without updating all of those together. Keep IDs and entry
+points consistent with the QML and shell commands that refer to them.
 
 For a bug report, include the ArchIsland version, the steps to reproduce, what you
 expected, and what happened. Screenshots or short recordings help with visual
