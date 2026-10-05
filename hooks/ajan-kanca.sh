@@ -19,7 +19,7 @@ oturum=""
 if [[ -n $veri ]] && command -v jq >/dev/null 2>&1; then
   oturum="$(jq -r '.session_id // .sessionId // .conversation_id // .conversationId // .thread_id // ."thread-id" // empty' <<<"$veri" 2>/dev/null | head -n1)"
 fi
-[[ -z $oturum ]] && oturum="varsayilan"
+[[ -z $oturum ]] && oturum="default"
 
 kabuk="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}/bin/archisland-shell"
 [[ -x $kabuk ]] || kabuk="$(command -v archisland-shell 2>/dev/null || true)"

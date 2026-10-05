@@ -106,10 +106,10 @@ LivePill {
     anchors.rightMargin: 18
     anchors.verticalCenter: parent.verticalCenter
     spacing: 3
-    Satir { etiket: "5 saat"; yuzde: pill.sonLimit ? pill.sonLimit.oturum : 0 }
+    Satir { etiket: "5 hours"; yuzde: pill.sonLimit ? pill.sonLimit.oturum : 0 }
     Satir {
       visible: !!pill.sonLimit && pill.sonLimit.haftalik >= 0
-      etiket: "Haftalık"
+      etiket: "Weekly"
       yuzde: pill.sonLimit ? Math.max(0, pill.sonLimit.haftalik) : 0
     }
   }

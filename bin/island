@@ -25,6 +25,12 @@ case "${1:-}" in
   toggle)
     call_shell toggle
     ;;
+  clipboard)
+    call_shell show clipboard
+    ;;
+  emoji)
+    call_shell show emoji
+    ;;
   tray)
     call_shell show tray
     ;;
@@ -53,19 +59,19 @@ case "${1:-}" in
     exec "$SCRIPTS_DIR/kill-port.sh" "$@"
     ;;
   agent)
-    # Ajan durumu: island agent <claude|agy|gemini|codex> <working|waiting|done|idle> [oturum]
-    # veya: island agent clear / island agent list
+    # Agent state: island agent <claude|agy|gemini|codex> <working|waiting|done|idle> [session]
+    # or: island agent clear / island agent list
     if [[ "${2:-}" == "clear" || "${2:-}" == "reset" ]]; then
       call_shell agent "clear" "clear" ""
     elif [[ "${2:-}" == "list" || "${2:-}" == "status" ]]; then
       call_shell agent "list" "list" ""
     elif [[ $# -lt 3 ]]; then
-      echo "Kullanım: island agent <ajan> <working|waiting|done|idle> [oturum-id]" >&2
-      echo "         island agent clear  (tüm oturumları temizler)" >&2
-      echo "         island agent list   (aktif oturumları listeler)" >&2
+      echo "Usage: island agent <agent> <working|waiting|done|idle> [session-id]" >&2
+      echo "         island agent clear  (clears all sessions)" >&2
+      echo "         island agent list   (lists active sessions)" >&2
       exit 1
     else
-      call_shell agent "$2" "$3" "${4:-varsayilan}"
+      call_shell agent "$2" "$3" "${4:-default}"
     fi
     ;;
   demo)

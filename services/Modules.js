@@ -9,27 +9,27 @@
 // kategori: "temel" (herkes için) veya "gelistirici" (geliştirici paketi).
 
 var kategoriler = [
-  { id: "temel", ad: "Temel", aciklama: "Günlük kullanım için island özellikleri." },
-  { id: "gelistirici", ad: "Geliştirici Paketi", aciklama: "Yazılım geliştirenler için canlı etkinlikler ve Geliştirici görünümünün bölümleri. Varsayılan olarak kapalı." }
+  { id: "temel", ad: "Temel", aciklama: "Everyday island features." },
+  { id: "gelistirici", ad: "Developer Pack", aciklama: "Live activities and Developer view sections for software developers. Off by default." }
 ]
 
 var liste = [
-  { id: "mediaPill", ad: "Şimdi Çalan", aciklama: "Müzik çalarken island'da kapak ve ses dalgası belirir", kategori: "temel", varsayilan: true },
-  { id: "volumeHud", ad: "Ses Göstergesi", aciklama: "Ses değişince birkaç saniye seviye çubuğu belirir", kategori: "temel", varsayilan: true },
-  { id: "downloads", ad: "İndirmeler", aciklama: "İndirme sürerken ilerleme, bitince dosya adı belirir", kategori: "temel", varsayilan: true },
-  { id: "clipboard", ad: "Pano", aciklama: "Bir şey kopyalayınca birkaç saniye içeriği belirir", kategori: "temel", varsayilan: true },
-  { id: "systemUpdates", ad: "Sistem Güncellemeleri", aciklama: "Paket güncellemesi sürerken ve bitince belirir", kategori: "temel", varsayilan: true },
-  { id: "batteryActivity", ad: "Pil", aciklama: "Şarja takınca ve pil %20/%10'a düşünce belirir", kategori: "temel", varsayilan: true },
-  { id: "bluetoothActivity", ad: "Bluetooth", aciklama: "Bir cihaz bağlanınca ya da ayrılınca belirir", kategori: "temel", varsayilan: true },
-  { id: "workspaceHud", ad: "Çalışma Alanı Göstergesi", aciklama: "Çalışma alanı değişince numaralar kısa süre belirir", kategori: "temel", varsayilan: false },
-  { id: "workspaceHudApps", ad: "Masaüstünde uygulama simgeleri", aciklama: "Masaüstü göstergesinde numaralar yerine uygulama simgeleri; boş masaüstleri nokta kalır, kapalıyken numara ve noktalar", kategori: "temel", varsayilan: true },
-  { id: "keyboardHud", ad: "Klavye Düzeni", aciklama: "Klavye dili değişince kısa süre belirir", kategori: "temel", varsayilan: true },
-  { id: "calendar", ad: "Takvim", aciklama: "Bir saat içinde etkinlik varsa geri sayımla belirir; sağ tık takvimi açar", kategori: "temel", varsayilan: true },
-  { id: "aiQuota", ad: "AI Kota", aciklama: "Claude/Antigravity/Codex kotası eşiğin altına düşünce ana island'da bir kez uyarır (tıklayınca ya da 1 dk sonra kapanır; 5 dk'da bir yoklanır); Geliştirici görünümünde kota kartları", kategori: "gelistirici", varsayilan: false },
-  { id: "aiAgents", ad: "Ajan Durumu", aciklama: "Claude Code, Antigravity veya Codex çalışırken görünür, bitince \"bitti\" der (ajan kancaları gerekir: install.sh --ajan-kancalari)", kategori: "gelistirici", varsayilan: false },
-  { id: "githubPrs", ad: "GitHub PR'ları", aciklama: "Geliştirici görünümünde depolarındaki pull request'ler", kategori: "gelistirici", varsayilan: false },
-  { id: "devPorts", ad: "Portlar", aciklama: "Geliştirici görünümünde dinleyen portlar", kategori: "gelistirici", varsayilan: false },
-  { id: "docker", ad: "Docker", aciklama: "Geliştirici görünümünde konteynerler", kategori: "gelistirici", varsayilan: false }
+  { id: "mediaPill", ad: "Now Playing", aciklama: "Shows cover art and a waveform on the island while music plays", kategori: "temel", varsayilan: true },
+  { id: "volumeHud", ad: "Volume Indicator", aciklama: "Shows a level bar for a few seconds when the volume changes", kategori: "temel", varsayilan: true },
+  { id: "downloads", ad: "Downloads", aciklama: "Shows progress while downloading and the file name when finished", kategori: "temel", varsayilan: true },
+  { id: "clipboard", ad: "Clipboard", aciklama: "Shows the copied content for a few seconds", kategori: "temel", varsayilan: true },
+  { id: "systemUpdates", ad: "System Updates", aciklama: "Appears while a package update runs and when it finishes", kategori: "temel", varsayilan: true },
+  { id: "batteryActivity", ad: "Battery", aciklama: "Appears when plugged in and when the battery drops to 20%/10%", kategori: "temel", varsayilan: true },
+  { id: "bluetoothActivity", ad: "Bluetooth", aciklama: "Appears when a device connects or disconnects", kategori: "temel", varsayilan: true },
+  { id: "workspaceHud", ad: "Workspace Indicator", aciklama: "Shows the workspace numbers briefly when the workspace changes", kategori: "temel", varsayilan: false },
+  { id: "workspaceHudApps", ad: "App icons on workspaces", aciklama: "App icons instead of numbers in the workspace indicator; empty workspaces stay as dots; when off, numbers and dots", kategori: "temel", varsayilan: true },
+  { id: "keyboardHud", ad: "Keyboard Layout", aciklama: "Appears briefly when the keyboard layout changes", kategori: "temel", varsayilan: true },
+  { id: "calendar", ad: "Calendar", aciklama: "Appears with a countdown when an event starts within an hour; right-click opens the calendar", kategori: "temel", varsayilan: true },
+  { id: "aiQuota", ad: "AI Quota", aciklama: "Warns once on the main island when Claude/Antigravity/Codex quota drops below the threshold (dismissed on click or after 1 min; polled every 5 min); quota cards in the Developer view", kategori: "gelistirici", varsayilan: false },
+  { id: "aiAgents", ad: "Agent Status", aciklama: "Shown while Claude Code, Antigravity or Codex is working and says \"done\" when finished (needs agent hooks: install.sh --agent-hooks)", kategori: "gelistirici", varsayilan: false },
+  { id: "githubPrs", ad: "GitHub PRs", aciklama: "Pull requests of your repositories in the Developer view", kategori: "gelistirici", varsayilan: false },
+  { id: "devPorts", ad: "Ports", aciklama: "Listening ports in the Developer view", kategori: "gelistirici", varsayilan: false },
+  { id: "docker", ad: "Docker", aciklama: "Containers in the Developer view", kategori: "gelistirici", varsayilan: false }
 ]
 
 function kategoridekiler(kategori) {

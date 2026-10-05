@@ -39,10 +39,10 @@ Item {
     if (sayi === 0) return ""
     if (bekleyenVar) {
       var b = liste.filter(function(o) { return o.durum === "waiting" })[0]
-      return ad(b.ajan) + " onay bekliyor"
+      return ad(b.ajan) + " needs approval"
     }
-    if (sayi === 1) return ad(liste[0].ajan) + " çalışıyor"
-    return sayi + " ajan çalışıyor"
+    if (sayi === 1) return ad(liste[0].ajan) + " working"
+    return sayi + " agents working"
   }
   readonly property color ozetRenk: tekAjan !== "" ? renk(tekAjan) : "#e2e6de"
 
@@ -55,24 +55,24 @@ Item {
     for (var k in oturumlar) {
       var o = oturumlar[k]
       var sn = Math.round((Date.now() - o.zaman) / 1000)
-      out.push(k + " (" + o.durum + ", " + sn + "s once)")
+      out.push(k + " (" + o.durum + ", " + sn + "s ago)")
     }
-    return out.length ? out.join(", ") : "aktif ajan yok"
+    return out.length ? out.join(", ") : "no active agents"
   }
 
   function bildir(ajan, durum, oturum) {
     ajan = String(ajan || "").toLowerCase()
     durum = String(durum || "").toLowerCase()
-    oturum = String(oturum || "varsayilan")
-    if (!enabled) return "kapali"
+    oturum = String(oturum || "default")
+    if (!enabled) return "disabled"
     if (durum === "list" || durum === "status" || ajan === "list") {
       return oturumListesi()
     }
     if (ajan === "clear" || durum === "clear" || durum === "reset") {
       oturumlar = ({})
-      return "temizlendi"
+      return "cleared"
     }
-    if (!ajan) return "hata: ajan adı yok"
+    if (!ajan) return "error: missing agent name"
     var anahtar = ajan + "/" + oturum
     var kopya = Object.assign({}, oturumlar)
     if (durum === "working" || durum === "waiting") {
@@ -83,9 +83,9 @@ Item {
       oturumlar = kopya
       sonBiten = ajan
       bitti(ajan)
-      return vardi ? "bitti" : "bitti (oturum bilinmiyordu)"
+      return vardi ? "done" : "done (unknown session)"
     } else if (durum === "idle") {
-      if (oturum === "all" || oturum === "*" || oturum === "varsayilan") {
+      if (oturum === "all" || oturum === "*" || oturum === "default") {
         for (var k in kopya) {
           if (kopya[k].ajan === ajan) delete kopya[k]
         }
@@ -93,7 +93,7 @@ Item {
         delete kopya[anahtar]
       }
     } else {
-      return "hata: durum working|waiting|done|idle|clear|reset olmalı"
+      return "error: state must be working|waiting|done|idle|clear|reset"
     }
     oturumlar = kopya
     return durum

@@ -44,7 +44,7 @@ LivePill {
     anchors.right: saat.left
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
-    text: !pill.event ? "" : pill.event.minutes <= 0 ? "şimdi" : pill.event.minutes + " dk"
+    text: !pill.event ? "" : pill.event.minutes <= 0 ? "now" : pill.event.minutes + " min"
     color: pill.host.theme.accent
     font.family: "Adwaita Sans"
     font.pixelSize: 13

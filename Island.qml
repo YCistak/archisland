@@ -150,7 +150,7 @@ Item {
   // Öğenin sahne (pencere) koordinatlarındaki dikdörtgeni: mask Region'ı
   // da aynı dönüşümü (mapToScene) kullanır.
   function sahneDikdortgen(item) {
-    if (!item) return "yok"
+    if (!item) return "none"
     var p = item.mapToItem(null, 0, 0)
     var q = item.mapToItem(null, item.width, item.height)
     return Math.round(p.x) + "," + Math.round(p.y) + " " + Math.round(q.x - p.x) + "x" + Math.round(q.y - p.y)
@@ -190,6 +190,12 @@ Item {
     var baskaSeyVar = live.anaEtkinlik && live.ana !== "kurulum"
 
     if (baskaSeyVar) {
+      if (live.ana === "kota") {
+        root.aiQuota.kapat()
+        if (right) view = "controls"
+        else if (viewAllowed("dev") && settings.aiQuota) openDev("ai")
+        return
+      }
       if (right) {
         view = "controls"
       } else {
@@ -499,6 +505,12 @@ Item {
       return root.view
     }
     function toggle(): string { return root.toggleView("controls") }
+    function clipboard(): string { return root.toggleView("clipboard") }
+    function emoji(): string { return root.toggleView("emoji") }
+    function dismissQuota(): string {
+      root.aiQuota.kapat()
+      return "ok"
+    }
     function themes(): string { return root.toggleView("themes") }
     function wallpapers(): string { return root.toggleView("wallpapers") }
     function apps(): string { return root.toggleView("apps") }
@@ -534,7 +546,7 @@ Item {
     // Teşhis: giriş maskesindeki island ve görünür kabarcık dikdörtgenleri
     // (sahne koordinatları; kabarcık fare tıklamasının hedefi bunlardır).
     function regions(): string {
-      return root.girisBolgeleri ? root.girisBolgeleri() : "hata: pencere yok"
+      return root.girisBolgeleri ? root.girisBolgeleri() : "error: no window"
     }
     // Island'a tıklama (fareyle aynı işlev): "left" ya da "right".
     function currentActivity(): string {

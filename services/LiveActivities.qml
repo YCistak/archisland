@@ -60,7 +60,7 @@ QtObject {
     { id: "ajan", kosul: h.agents.sayi > 0, kucuk: true, gorunum: "",
       simge: "", metin: h.agents.sayi > 1 ? String(h.agents.sayi) : "", renk: h.agents.ozetRenk, hareketli: true },
     { id: "takvim", kosul: !!h.calendar.nextEvent, kucuk: true, gorunum: "calendar",
-      simge: "󰃭", metin: !h.calendar.nextEvent ? "" : h.calendar.nextEvent.minutes <= 0 ? "şimdi" : h.calendar.nextEvent.minutes + " dk",
+      simge: "󰃭", metin: !h.calendar.nextEvent ? "" : h.calendar.nextEvent.minutes <= 0 ? "now" : h.calendar.nextEvent.minutes + " min",
       renk: h.theme.accent },
     { id: "medya", kosul: h.nowPlaying.playing && !!h.settings.mediaPill, kucuk: true, gorunum: "player",
       simge: "󰝚", metin: "", renk: h.nowPlaying.tint, dalga: true }
@@ -129,7 +129,7 @@ QtObject {
     hedef = String(hedef === undefined ? "" : hedef)
     var k = kucukler
     var sira = /^[0-9]+$/.test(hedef) ? Number(hedef) : k.indexOf(hedef)
-    if (sira < 0 || sira >= k.length) return "hata: kabarcık yok (" + k.join(",") + ")"
+    if (sira < 0 || sira >= k.length) return "error: no such bubble (" + k.join(",") + ")"
     var yeni = k[sira]
     var eski = ana
     var sirali = k.slice()

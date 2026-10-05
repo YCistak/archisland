@@ -58,7 +58,7 @@ def parse_ics(ics_text):
                         if th and tm:
                             cur["time"] = f"{th}:{tm}"
                         else:
-                            cur["time"] = "Tüm gün"
+                            cur["time"] = "All day"
     return events
 
 def main():
@@ -74,7 +74,7 @@ def main():
             events.append({
                 "id": str(int(datetime.datetime.now().timestamp() * 1000)),
                 "date": date_str,
-                "time": time_str or "Tüm gün",
+                "time": time_str or "All day",
                 "summary": summary
             })
             save_events(events)

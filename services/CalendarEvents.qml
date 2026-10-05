@@ -48,7 +48,7 @@ Item {
   function add(dateStr, timeStr, title) {
     title = String(title || "").trim()
     if (!enabled || !title) return
-    var time = String(timeStr || "").trim() || "Tüm gün"
+    var time = String(timeStr || "").trim() || "All day"
     writeProc.command = Scripts.command(pluginDir, "calendar-sync.py", ["add", dateStr, time, title])
     writeProc.running = true
   }
