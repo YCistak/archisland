@@ -1,7 +1,7 @@
 #!/bin/bash
 # Installs (or updates) the guilhermerisu.notifications companion from this repo,
 # enables it in shell.json in place of the stock notification service, points
-# the ArchIsland menu's Theme, Background, System, and Apps entries at the island,
+# the ArchIsland menu's System and Apps entries at the island,
 # writes ~/.config/hypr/island-bindings.lua (see bindings.sh), and restarts the
 # shell so the new notification server takes over.
 #
@@ -66,8 +66,7 @@ jq --argjson disable "$disable" '
 ' "$config" >"$tmp"
 mv "$tmp" "$config"
 
-# Menu entries: SUPER+SHIFT+CTRL+SPACE runs `archisland-menu toggle theme`,
-# SUPER+CTRL+SPACE `archisland-menu toggle background`, SUPER+ESCAPE and the
+# Menu entries: SUPER+ESCAPE and the
 # power key `archisland-menu toggle system`, and `archisland-menu toggle apps` (the
 # menu's Apps row, or any key bound to it) resolves to apps; the menu's
 # Emoji row resolves to trigger.emoji and its Learn → Keybindings row to
@@ -76,8 +75,6 @@ mv "$tmp" "$config"
 # repeated from ArchIsland's default entries. An existing override of any of
 # them is left alone.
 menu_entries=(
-  'style.theme|  "style.theme": {"icon":"󰸌","label":"Theme","aliases":["theme","themes"],"action":"archisland-shell guilhermerisu.island themes"},'
-  'style.background|  "style.background": {"icon":"","label":"Background","aliases":["background","wallpaper"],"action":"archisland-shell guilhermerisu.island wallpapers"},'
   'apps|  "apps": {"icon":"󰀻","label":"Apps","aliases":["app","applications"],"action":"archisland-shell guilhermerisu.island apps"},'
   'system|  "system": {"icon":"","label":"System","aliases":["power-menu"],"action":"archisland-shell guilhermerisu.island power"},'
   'trigger.emoji|  "trigger.emoji": {"icon":"","label":"Emoji","aliases":["emoji","emojis"],"action":"archisland-shell guilhermerisu.island show emoji"},'

@@ -511,8 +511,6 @@ Item {
       root.aiQuota.kapat()
       return "ok"
     }
-    function themes(): string { return root.toggleView("themes") }
-    function wallpapers(): string { return root.toggleView("wallpapers") }
     function apps(): string { return root.toggleView("apps") }
     function power(): string { return root.toggleView("power") }
     function ask(question: string): string {

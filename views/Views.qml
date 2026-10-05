@@ -5,8 +5,6 @@ import "bluetooth"
 import "wifi"
 import "power"
 import "launcher"
-import "themes"
-import "wallpapers"
 import "emoji"
 import "keybinds"
 import "clipboard"
@@ -27,7 +25,7 @@ Item {
   id: views
   required property var host
 
-  readonly property var surfaces: [controlsSurface, wifiSurface, bluetoothSurface, themesSurface, wallpapersSurface, appsSurface, powerSurface, emojiSurface, keybindsSurface, clipboardSurface, menuSurface, playerSurface, settingsSurface, answerSurface, pluginsSurface, traySurface, calendarSurface, devSurface]
+  readonly property var surfaces: [controlsSurface, wifiSurface, bluetoothSurface, appsSurface, powerSurface, emojiSurface, keybindsSurface, clipboardSurface, menuSurface, playerSurface, settingsSurface, answerSurface, pluginsSurface, traySurface, calendarSurface, devSurface]
   function surfaceFor(name) {
     for (var i = 0; i < surfaces.length; i++) if (surfaces[i].viewName === name) return surfaces[i]
     return null
@@ -56,24 +54,6 @@ Item {
     viewName: "bluetooth"
     fixedWidth: 480
     BluetoothView { host: views.host; active: bluetoothSurface.active; anchors.fill: parent }
-  }
-
-  Surface {
-    id: themesSurface
-    host: views.host
-    viewName: "themes"
-    fixedWidth: 820
-    padding: 20
-    ThemeSwitcher { host: views.host; active: themesSurface.active; anchors.fill: parent }
-  }
-
-  Surface {
-    id: wallpapersSurface
-    host: views.host
-    viewName: "wallpapers"
-    fixedWidth: 820
-    padding: 20
-    WallpaperSwitcher { host: views.host; active: wallpapersSurface.active; anchors.fill: parent }
   }
 
   Surface {

@@ -24,7 +24,7 @@
     "icon": "",
     "label": "Developer & AI Quota",
     "aliases": ["dev", "island-dev", "developer"],
-    "action": "/home/asaf/.local/bin/island show dev"
+    "action": "island show dev"
   },
   "ocr": {
     "icon": "󰴑",
@@ -35,8 +35,6 @@
 
   // Style fixes
   "style.about": {"when": "false"},
-  "style.theme": {"icon":"󰸌","label":"Theme","aliases":["theme","themes"],"action":"archisland-shell guilhermerisu.island themes"},
-  "style.background": {"icon":"","label":"Background","aliases":["background","wallpaper"],"action":"archisland-shell guilhermerisu.island wallpapers"},
   "style.bar": {"when": "false"},
   "style.island": {"icon":"󰍜","label":"Island Settings","parent":"style","action":"archisland-shell guilhermerisu.island show settings"},
   "style.hyprland": {"icon":"","label":"Hyprland","action":"archisland-launch-config-editor \"$HOME/.config/hypr/hyprland.lua\""},
@@ -63,13 +61,10 @@
   "install.development.javascript.deno": {"disabled": "archisland-cmd-present deno || [[ -d $HOME/.local/share/mise/installs/deno ]]"},
   "install.development.php.php": {"disabled": "archisland-cmd-present php || [[ -d $HOME/.local/share/mise/installs/php ]]"},
   "install.development.zig": {"disabled": "archisland-cmd-present zig || [[ -d $HOME/.local/share/mise/installs/zig ]]"},
-  "install.style.font.meslo": {"disabled": "fc-list : family | grep -qi meslo"},
   "install.gaming.steam": {"disabled": "archisland-cmd-present steam || archisland-pkg-present steam"},
 
   // Portal & Last Session
-  "dev.portal": {"icon":"󰛳","label":"Portal (Dev Ports & Tunnels)","action":"/home/asaf/.local/bin/island portal"},
-  "setup.config.last-session": {"icon":"󰁯","label":"Last Session Config","action":"~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session config"},
-  "system.logout": {"icon":"󰍃","label":"Logout","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-logout"},
-  "system.reboot": {"icon":"󰜉","label":"Reboot","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-reboot"},
-  "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"[[ -x ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session ]] && ~/.config/archisland/plugins/io.github.asmyshlyaev177.last-session/bin/archisland-last-session shutdown; archisland-system-shutdown"}
+  "system.logout": {"icon":"󰍃","label":"Logout","action":"island save-session; archisland-system-logout"},
+  "system.reboot": {"icon":"󰜉","label":"Reboot","action":"island save-session; archisland-system-reboot"},
+  "system.shutdown": {"icon":"󰐥","label":"Shutdown","action":"island save-session; archisland-system-shutdown"}
 }

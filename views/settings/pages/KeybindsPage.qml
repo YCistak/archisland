@@ -174,7 +174,6 @@ ColumnLayout {
   readonly property var shortcutSections: [
     { title: "Menus", ids: ["menu", "apps", "power"] },
     { title: "Search", ids: ["keybinds", "emoji", "clipboard"] },
-    { title: "Appearance", ids: ["themes", "wallpapers"] },
     { title: "Island", ids: ["controls", "player", "plugins", "tray", "settings"] }
   ]
 

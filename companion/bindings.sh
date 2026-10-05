@@ -23,8 +23,6 @@ catalog=(
   'keybinds|Keybindings|show keybinds|SUPER + K|archisland-menu-keybindings;archisland-menu toggle learn.keybindings'
   'emoji|Emoji|show emoji|SUPER + CTRL + E|archisland-shell shell toggle archisland.emojis;archisland-menu toggle trigger.emoji'
   'clipboard|Clipboard|show clipboard|SUPER + CTRL + V|archisland-shell shell toggle archisland.clipboard'
-  'themes|Themes|themes|SUPER + SHIFT + CTRL + SPACE|archisland-menu toggle theme;archisland-menu toggle style.theme'
-  'wallpapers|Wallpapers|wallpapers|SUPER + CTRL + SPACE|archisland-menu toggle background;archisland-menu toggle style.background'
   'power|Power menu|power|SUPER + ESCAPE|archisland-menu toggle system'
   'controls|Control center|toggle||'
   'player|Now playing|show player||'
