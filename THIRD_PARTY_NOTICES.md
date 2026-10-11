@@ -14,8 +14,34 @@ project. Its original license and copyright notice are preserved unchanged in
 
 Files under `core/` remain under their original MIT terms.
 
-## Island plugin
+## Island plugin (original MIT portions)
 
-The Island plugin (plugin id `guilhermerisu.island`) is distributed under the MIT
-License in the root [`LICENSE`](LICENSE), with copyright held by
-Guilherme Pimenta and YCistak.
+Portions of this project were originally released under the MIT License by
+Guilherme Pimenta; those portions retain their MIT notice below. The project as a
+whole, including all modifications, is distributed under GPL-3.0-only (see the
+root [`LICENSE`](LICENSE)).
+
+```text
+MIT License
+
+Copyright (c) 2026 Guilherme Pimenta
+Copyright (c) 2026 YCistak
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
