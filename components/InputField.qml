@@ -1,7 +1,7 @@
 import QtQuick
 
-// Island görünümlerindeki tek satırlık yazı alanı: koyu kuyu, odaklanınca
-// vurgu kenarı, boşken soluk ipucu. Enter `submitted` sinyalini verir.
+// Single-line text field in island views: a dark well, an accent border on
+// focus, a faint hint when empty. Enter emits the `submitted` signal.
 Rectangle {
   id: field
   required property var theme

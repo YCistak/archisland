@@ -1,7 +1,7 @@
 import QtQuick
 
-// Kodlama ajanı / Siri düşünme göstergesi: akıcı, organik, donanımsal
-// hızlandırmalı yumuşak ışık parçacıkları ve soluk alan aurası.
+// Coding agent / Siri thinking indicator: fluid, organic, hardware-accelerated
+// soft light particles and a breathing aura.
 Item {
   id: dots
   property bool running: true
@@ -9,7 +9,7 @@ Item {
   implicitWidth: 36
   implicitHeight: 36
 
-  // Faz animasyonu: parçacıkların dalgalanması ve nefes alması için
+  // Phase animation: for the particles' rippling and breathing
   property real phase: 0
   NumberAnimation on phase {
     from: 0
@@ -19,7 +19,7 @@ Item {
     running: dots.running && dots.visible
   }
 
-  // Yörünge dönüşü: kesintisiz ve takılmasız (vsync kilitli) dönüş
+  // Orbit rotation: continuous, stutter-free (vsync-locked) spin
   property real spin: 0
   NumberAnimation on spin {
     from: 0
@@ -29,7 +29,7 @@ Item {
     running: dots.running && dots.visible
   }
 
-  // Merkezdeki hafif nefes alan aura parıltısı
+  // A softly breathing aura glow in the center
   Rectangle {
     anchors.centerIn: parent
     readonly property real auraPulse: 0.85 + 0.15 * Math.sin(dots.phase * 2)
@@ -65,7 +65,7 @@ Item {
         x: cluster.width / 2 + Math.cos(curAngle) * curRadius
         y: cluster.height / 2 + Math.sin(curAngle) * curRadius
 
-        // Yumuşak ışık halesi (halo)
+        // Soft light halo
         Rectangle {
           anchors.centerIn: parent
           width: curSize + 3
@@ -75,7 +75,7 @@ Item {
           opacity: curOpacity * 0.25
         }
 
-        // Net çekirdek nokta
+        // Crisp core dot
         Rectangle {
           anchors.centerIn: parent
           width: curSize

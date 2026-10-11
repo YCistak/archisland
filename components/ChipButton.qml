@@ -1,15 +1,15 @@
 import QtQuick
 
-// Island görünümlerindeki küçük yuvarlak düğme: bir simge ya da kısa yazı.
-// Renk geçişleri ortak hareket sistemiyle (MotionColorAnimation) yapılır.
+// A small round button in island views: an icon or short text.
+// Color transitions use the shared motion system (MotionColorAnimation).
 Rectangle {
   id: chip
   required property var theme
   property string label: ""
-  // true: simge yazı tipi (Nerd Font), false: Adwaita Sans.
+  // true: icon font (Nerd Font), false: Adwaita Sans.
   property bool glyph: true
   property color ink: theme.text
-  // Seçili/vurgulu hâl (sekme, açık form...).
+  // Selected/highlighted state (tab, open form...).
   property bool checked: false
   property color tint: theme.text
   property string tip: ""

@@ -24,7 +24,7 @@ Item {
 
   WorkspaceApps { id: appModel }
 
-  // Uygulama simgesi; bulunamazsa baş harf rozeti
+  // App icon; an initial-letter badge if none is found
   component AppGlyph: Item {
     property var app
     property int size: 14
@@ -76,10 +76,10 @@ Item {
           required property int modelData
           readonly property var workspace: pill.workspaceById(modelData)
           readonly property bool occupied: !!workspace && workspace.toplevels.values.length > 0
-          readonly property var app: pill.appsMode && occupied ? appModel.baskin(workspace) : null
+          readonly property var app: pill.appsMode && occupied ? appModel.dominant(workspace) : null
           width: pill.slot
           height: pill.slot
-          // Pencere olan masaüstünde nokta yerine uygulama simgesi
+          // On a workspace with windows, the app icon instead of a dot
           AppGlyph {
             visible: !!workspaceSlot.app
             anchors.centerIn: parent
@@ -109,8 +109,8 @@ Item {
       radius: height / 2
       color: pill.host.settings.colorfulLiveActivities ? "#ffffff" : pill.host.theme.accent
       Behavior on x { MotionAnimation { theme: pill.host.theme; pace: "expressive" } }
-      readonly property var app: pill.appsMode ? appModel.baskin(pill.workspaceById(pill.host.focusedWorkspaceId)) : null
-      // Etkin masaüstünde beyaz kapsülün içinde simge; simge yoksa numara
+      readonly property var app: pill.appsMode ? appModel.dominant(pill.workspaceById(pill.host.focusedWorkspaceId)) : null
+      // On the active workspace the icon sits in the white capsule; the number if there is no icon
       AppGlyph {
         visible: !!parent.app
         anchors.centerIn: parent

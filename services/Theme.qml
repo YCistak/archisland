@@ -22,8 +22,8 @@ Item {
   readonly property real motionScale: settings.motionScale > 0 ? settings.motionScale : 1.5
   // Motion roles share one cadence at every user-selected speed. Curves end
   // with a soft landing; geometry stays inside its bounds without bouncing.
-  // İstisna "spring": dinlenme hâlindeki canlı etkinlik geçişleri (island
-  // genişliği, kabarcıklar) için hafif (~%6) taşan yay hissi.
+  // Exception "spring": a light (~6%) overshooting spring feel for live activity
+  // transitions at rest (island width, bubbles).
   readonly property var motionDurations: ({
     press: 65, quick: 110, standard: 170, expressive: 220,
     morph: 240, collapse: 190, fade: 110, exit: 90, bubble: 280

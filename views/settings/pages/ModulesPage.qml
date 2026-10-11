@@ -3,8 +3,8 @@ import QtQuick.Layouts
 import "../controls"
 import "../../../services/Modules.js" as Modules
 
-// Ayarlar → Modüller: island özelliklerini kategorilere göre aç/kapa.
-// Değişiklik anında island.json'a yazılır ve yeniden başlatmadan uygulanır.
+// Settings → Modules: switch island features on/off by category.
+// Changes are written to island.json immediately and apply without a restart.
 ColumnLayout {
   id: page
   required property var view
@@ -13,22 +13,22 @@ ColumnLayout {
   spacing: 20
 
   Repeater {
-    model: Modules.kategoriler
+    model: Modules.categories
     delegate: SettingsGroup {
       id: group
       required property var modelData
-      readonly property var modules: Modules.kategoridekiler(modelData.id)
+      readonly property var modules: Modules.inCategory(modelData.id)
       view: page.view
-      title: modelData.ad
-      footer: modelData.aciklama
+      title: modelData.name
+      footer: modelData.description
       Repeater {
         model: group.modules
         delegate: SettingsRow {
           required property var modelData
           required property int index
           view: page.view
-          label: modelData.ad
-          detail: modelData.aciklama
+          label: modelData.name
+          detail: modelData.description
           last: index === group.modules.length - 1
           SettingsSwitch {
             view: page.view
@@ -40,38 +40,38 @@ ColumnLayout {
     }
   }
 
-  // Sayı alanı: Enter'da (ya da odak gidince) island.json'a yazılır.
-  component SayiAlani: Rectangle {
-    id: alan
-    required property string anahtar
-    property int enAz: 1
-    property int enCok: 99
+  // Number field: written to island.json on Enter (or when focus leaves).
+  component NumberField: Rectangle {
+    id: field
+    required property string key
+    property int minimum: 1
+    property int maximum: 99
     width: 64
     height: 28
     radius: 7
     color: page.view.well
-    border.width: girdi.activeFocus ? 2 : 0
+    border.width: numberInput.activeFocus ? 2 : 0
     border.color: page.view.host.theme.withAlpha(page.view.accent, 0.6)
     TextInput {
-      id: girdi
+      id: numberInput
       anchors.fill: parent
       anchors.leftMargin: 8
       anchors.rightMargin: 8
       verticalAlignment: TextInput.AlignVCenter
       horizontalAlignment: TextInput.AlignRight
-      validator: IntValidator { bottom: alan.enAz; top: alan.enCok }
+      validator: IntValidator { bottom: field.minimum; top: field.maximum }
       color: page.view.text
       font.family: "Adwaita Sans"
       font.pixelSize: 13
-      text: String(page.view.settings[alan.anahtar])
+      text: String(page.view.settings[field.key])
       onEditingFinished: {
         var n = parseInt(text)
-        if (!isNaN(n)) page.view.settings[alan.anahtar] = Math.max(alan.enAz, Math.min(alan.enCok, n))
+        if (!isNaN(n)) page.view.settings[field.key] = Math.max(field.minimum, Math.min(field.maximum, n))
       }
     }
   }
 
-  // Island'a tıklama düzeni ve saatin yeri (kısa kullanım notu).
+  // How clicks on the island work and where the clock goes (a short usage note).
   SettingsGroup {
     view: page.view
     title: "Usage"
@@ -81,7 +81,7 @@ ColumnLayout {
     SettingsRow { view: page.view; label: "Click a bubble"; detail: "Moves that activity to the main island (pins it)"; last: true }
   }
 
-  // Geliştirici canlı etkinliklerinin eşikleri.
+  // Thresholds of the developer live activities.
   SettingsGroup {
     view: page.view
     visible: !!page.view.settings.aiQuota || !!page.view.settings.aiAgents
@@ -91,25 +91,25 @@ ColumnLayout {
       view: page.view
       visible: !!page.view.settings.aiQuota
       label: "Quota alert threshold (% left)"
-      SayiAlani { anahtar: "aiQuotaWarnPercent"; enAz: 1; enCok: 99 }
+      NumberField { key: "aiQuotaWarnPercent"; minimum: 1; maximum: 99 }
     }
     SettingsRow {
       view: page.view
       visible: !!page.view.settings.aiQuota
       label: "Quota alert duration (s)"
       last: !page.view.settings.aiAgents
-      SayiAlani { anahtar: "aiQuotaAlertSeconds"; enAz: 5; enCok: 600 }
+      NumberField { key: "aiQuotaAlertSeconds"; minimum: 5; maximum: 600 }
     }
     SettingsRow {
       view: page.view
       visible: !!page.view.settings.aiAgents
       label: "\"Done\" banner duration (s)"
       last: true
-      SayiAlani { anahtar: "agentDoneSeconds"; enAz: 1; enCok: 30 }
+      NumberField { key: "agentDoneSeconds"; minimum: 1; maximum: 30 }
     }
   }
 
-  // GitHub PR kartındaki depolar (island.json → devRepos).
+  // Repositories on the GitHub PR card (island.json → devRepos).
   SettingsGroup {
     view: page.view
     visible: !!page.view.settings.githubPrs

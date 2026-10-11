@@ -24,8 +24,8 @@ Item {
       id: settingsData
       property real motionScale: 1.5
       property bool hoverLift: true
-      // Teşhis: true iken island/baloncuk fare olayları günlüğe "[girdi] ..."
-      // satırları olarak yazılır (journalctl --user -t archisland-shell).
+      // Diagnostics: while true, island/bubble mouse events are logged as "[input] ..."
+      // lines (journalctl --user -t archisland-shell).
       property bool debugInput: false
       property bool clock24h: true
       property bool mediaPill: true
@@ -39,7 +39,7 @@ Item {
       property bool batteryActivity: true
       property bool bluetoothActivity: true
       property bool workspaceHud: false
-      // Masaüstü değişince numaranın yanında o masaüstündeki uygulamaları göster
+      // When the workspace changes, show that workspace's apps next to its number
       property bool workspaceHudApps: true
       property bool keyboardHud: true
       property bool colorfulSettingsIcons: true
@@ -48,17 +48,17 @@ Item {
       property string controlCenterHidden: "game,power,keyboard"
       property bool microphoneMuteControl: false
       property string askAi: "chatgpt"
-      // Modüller (bkz. services/Modules.js). Geliştirici paketi varsayılan kapalı.
+      // Modules (see services/Modules.js). The Developer Pack is off by default.
       property bool calendar: true
       property bool aiQuota: false
       property bool githubPrs: false
       property bool devPorts: false
       property bool docker: false
-      // GitHub PR kartında gösterilecek depolar: ["sahip/depo", ...]
+      // Repositories shown on the GitHub PR card: ["owner/repo", ...]
       property var devRepos: []
-      // Canlı etkinlikler: kalan AI kotası bu yüzdenin altına düşünce uyarı;
-      // kota uyarısının ekranda kalma süresi (saniye);
-      // ajan "bitti" banner'ının süresi (saniye).
+      // Live activities: alert when the remaining AI quota drops below this percent;
+      // how long the quota alert stays on screen (seconds);
+      // how long the agent "done" banner stays (seconds).
       property int aiQuotaWarnPercent: 20
       property int aiQuotaAlertSeconds: 60
       property bool aiAgents: false

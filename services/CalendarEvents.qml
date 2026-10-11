@@ -2,20 +2,20 @@ import QtQuick
 import Quickshell.Io
 import "../lib/Scripts.js" as Scripts
 
-// Takvim verisi: scripts/calendar-sync.py ile okunur, eklenir ve silinir
-// (~/.config/archisland/calendar-events.json). Takvim görünümü ve "sıradaki
-// etkinlik" hapı aynı veriyi kullanır. Modül kapalıyken hiçbir şey çalışmaz.
+// Calendar data: read, added and removed through scripts/calendar-sync.py
+// (~/.config/archisland/calendar-events.json). The calendar view and the "next
+// event" pill use the same data. Nothing runs while the module is off.
 Item {
   id: calendar
   required property bool enabled
   required property string pluginDir
-  // Island'ın dakikalık saati; sıradaki etkinlik bununla yeniden hesaplanır.
+  // The island's minute clock; the next event is recomputed with it.
   required property var now
 
   property var events: []
   property int eventsCount: 0
 
-  // Önümüzdeki bir saat içinde başlayacak ilk saatli etkinlik (yoksa null).
+  // The first timed event starting within the next hour (null if none).
   readonly property var nextEvent: {
     if (!enabled) return null
     var t = now ? now.getTime() : Date.now()
@@ -25,12 +25,12 @@ Item {
       if (!start) continue
       var diff = start.getTime() - t
       if (diff < 0 || diff > 3600000) continue
-      if (!best || start < best.start) best = { start: start, summary: String(events[i].summary || "Etkinlik"), minutes: Math.ceil(diff / 60000) }
+      if (!best || start < best.start) best = { start: start, summary: String(events[i].summary || "Event"), minutes: Math.ceil(diff / 60000) }
     }
     return best
   }
 
-  // "YYYY-AA-GG" + "SS:DD" → Date; tüm gün etkinliklerinde null.
+  // "YYYY-MM-DD" + "HH:MM" → Date; null for all-day events.
   function startOf(ev) {
     var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ev.date || ""))
     var h = /^(\d{1,2}):(\d{2})$/.exec(String(ev.time || ""))
@@ -73,13 +73,13 @@ Item {
     }
   }
 
-  // Ekleme/silme bitince liste yeniden okunur.
+  // The list is re-read when an add/remove finishes.
   Process {
     id: writeProc
     onExited: calendar.sync()
   }
 
-  // Beş dakikada bir (uzak iCal adresi varsa) eşitle.
+  // Sync every five minutes (if there is a remote iCal URL).
   Timer {
     interval: 300000
     running: calendar.enabled
