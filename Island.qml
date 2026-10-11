@@ -20,11 +20,11 @@ Item {
 
   readonly property var nowPlaying: nowPlayingData
   NowPlaying { id: nowPlayingData; shell: root.shell; theme: root.theme; settings: root.settings }
-  // Hangi kalıcı canlı etkinliğin ana hap, hangisinin küçük kabarcık
-  // olacağı ve öncelik sırası: services/LiveActivities.qml.
+  // Which persistent live activity becomes the main pill, which become small
+  // bubbles, and the priority order: services/LiveActivities.qml.
   readonly property var live: liveActivities
   LiveActivities { id: liveActivities; host: root }
-  readonly property bool mediaPill: live.ana === "medya"
+  readonly property bool mediaPill: live.main === "media"
   onMediaPillChanged: console.log("DEBUG_ISLAND: mediaPill =", mediaPill, "view =", view, "needsSetup =", setup.needsSetup, "settings.mediaPill =", settings.mediaPill, "downloadPill =", downloadPill, "downloadDone =", downloadDone, "pkgFinished =", packages.finishedTitle, "dlFinished =", downloads.finishedName)
 
   property string askQuestion: ""
@@ -44,9 +44,9 @@ Item {
   DownloadTracker { id: downloadTracker; enabled: root.settings.downloads }
   readonly property var packages: packageTracker
   PackageUpdateTracker { id: packageTracker; enabled: root.settings.systemUpdates }
-  readonly property bool downloadDone: live.ana === "indirme"
+  readonly property bool downloadDone: live.main === "download"
     && (downloads.finishedName !== "" || packages.finishedTitle !== "")
-  readonly property bool downloadActive: live.ana === "indirme" && !downloadDone
+  readonly property bool downloadActive: live.main === "download" && !downloadDone
   readonly property bool downloadPill: downloadDone || downloadActive
   Process { id: downloadOpener }
   function openDownloads() {
@@ -90,83 +90,83 @@ Item {
   readonly property bool keyboardPill: view === "feedback" && feedbackKind === "keyboard"
   readonly property bool agentDonePill: view === "feedback" && feedbackKind === "agent"
 
-  // ---------- Geliştirici canlı etkinlikleri: ajanlar, AI kota ----------
+  // ---------- Developer live activities: agents, AI quota ----------
 
-  // Ajan durumu kancalardan IPC ile gelir (bkz. hooks/, `island agent`).
+  // Agent state arrives from the hooks over IPC (see hooks/, `island agent`).
   readonly property var agents: agentActivity
   AgentActivity {
     id: agentActivity
     enabled: !!root.settings.aiAgents
-    onBitti: function(ajan) {
-      // Limit kartı için kota verisi yoksa bir kez yokla (bkz. AgentDonePill).
-      if (!root.aiQuota.limitler(ajan)) root.aiQuota.yokla()
+    onFinished: function(agent) {
+      // Poll once if there is no quota data for the limit card (see AgentDonePill).
+      if (!root.aiQuota.limits(agent)) root.aiQuota.poll()
       root.showFeedback("", Math.max(1, root.settings.agentDoneSeconds || 6) * 1000, "agent")
     }
   }
-  readonly property bool agentPill: live.ana === "ajan" || live.ana === "ajanOnay"
+  readonly property bool agentPill: live.main === "agent" || live.main === "agentApproval"
   readonly property var aiQuota: aiQuotaWatch
   AiQuotaWatch {
     id: aiQuotaWatch
     enabled: !!root.settings.aiQuota
     pluginDir: root.setup.pluginDir
-    esik: root.settings.aiQuotaWarnPercent > 0 ? root.settings.aiQuotaWarnPercent : 20
+    threshold: root.settings.aiQuotaWarnPercent > 0 ? root.settings.aiQuotaWarnPercent : 20
   }
-  readonly property bool quotaPill: live.ana === "kota"
-  // Kota uyarısı tek seferlik: ana island'da aiQuotaAlertSeconds (varsayılan
-  // 60 sn) kalır, tıklanmazsa kendiliğinden kapanır. Uyarı ana island'da
-  // değilken (ör. onay bekleyen ajan önde) süre işlemez.
+  readonly property bool quotaPill: live.main === "quota"
+  // The quota alert is one-shot: it stays on the main island for
+  // aiQuotaAlertSeconds (default 60 s) and closes by itself if not clicked.
+  // The timer does not run while the alert is not on the main island (e.g. an
+  // agent waiting for approval is in front).
   Timer {
-    id: kotaSure
+    id: quotaTimer
     interval: Math.max(1, root.settings.aiQuotaAlertSeconds || 60) * 1000
     running: root.quotaPill
-    property var alarm: root.aiQuota.alarm
-    onAlarmChanged: if (running) restart()
-    onTriggered: root.aiQuota.kapat()
+    property var alert: root.aiQuota.alert
+    onAlertChanged: if (running) restart()
+    onTriggered: root.aiQuota.dismiss()
   }
-  // Geliştirici görünümünü belli bir sekmede aç (ör. "ai").
+  // Open the developer view on a given tab (e.g. "ai").
   property string devTab: ""
   function openDev(tab) {
     if (!viewAllowed("dev")) return
     devTab = String(tab || "")
     view = "dev"
   }
-  // Ana island'daki etkinliğin detayı: island'a SAĞ tık (kabarcık tıklaması
-  // ise yer değiştirir: LiveActivities.degistir). Sol tık her zaman island'ın
-  // kendisini (kontrol merkezi) açar.
-  function openActivity(etkinlik) {
-    if (!etkinlik) return
-    if (etkinlik.id === "ajan" || etkinlik.id === "ajanOnay" || etkinlik.id === "kota") {
+  // Details of the main island's activity (see islandClick; a bubble click
+  // swaps places instead: LiveActivities.swap).
+  function openActivity(activity) {
+    if (!activity) return
+    if (activity.id === "agent" || activity.id === "agentApproval" || activity.id === "quota") {
       if (viewAllowed("dev") && settings.aiQuota) openDev("ai")
       else view = "controls"
     }
-    else if (etkinlik.id === "indirme") openDownloads()
-    else if (etkinlik.gorunum && viewAllowed(etkinlik.gorunum)) view = etkinlik.gorunum
+    else if (activity.id === "download") openDownloads()
+    else if (activity.view && viewAllowed(activity.view)) view = activity.view
   }
 
-  // Teşhis günlüğü: island.json'da debugInput true iken fare olaylarını yazar.
-  function girdiLog(metin) {
-    if (settings.debugInput) console.log("[girdi] " + metin)
+  // Diagnostic log: writes mouse events while debugInput is true in island.json.
+  function inputLog(message) {
+    if (settings.debugInput) console.log("[input] " + message)
   }
-  // Öğenin sahne (pencere) koordinatlarındaki dikdörtgeni: mask Region'ı
-  // da aynı dönüşümü (mapToScene) kullanır.
-  function sahneDikdortgen(item) {
+  // The item's rectangle in scene (window) coordinates: the mask Region uses
+  // the same mapping (mapToScene).
+  function sceneRect(item) {
     if (!item) return "none"
     var p = item.mapToItem(null, 0, 0)
     var q = item.mapToItem(null, item.width, item.height)
     return Math.round(p.x) + "," + Math.round(p.y) + " " + Math.round(q.x - p.x) + "x" + Math.round(q.y - p.y)
   }
 
-  // Island'a tıklama (fare ve IPC aynı işlevi kullanır).
-  // Adada saat dışında başka bir canlı etkinlik varsa (medya, ajan vb.):
-  //   - Sol tık: o etkinliğin detayını açar (openActivity).
-  //   - Sağ tık: normal dinamik adayı açar (controls).
-  // Adada sadece saat varsa (özel etkinlik yoksa):
-  //   - Sol tık: normal dinamik adayı açar (controls).
-  //   - Sağ tık: takvimi açar.
+  // A click on the island (mouse and IPC use the same function).
+  // If the island shows a live activity besides the clock (media, agent etc.):
+  //   - Left click: opens that activity's details (openActivity).
+  //   - Right click: opens the regular dynamic island (controls).
+  // If the island shows only the clock (no special activity):
+  //   - Left click: opens the regular dynamic island (controls).
+  //   - Right click: opens the calendar.
   function islandClick(right) {
     feedbackTimer.stop()
 
-    // 1. Geri bildirim modundaysa (bildirim, pano, biten ajan vb.):
+    // 1. In feedback mode (notification, clipboard, finished agent etc.):
     if (view === "feedback") {
       if (notificationPill) {
         if (notifications.last && notifications.last.islandUpdate) updateIsland()
@@ -186,12 +186,12 @@ Item {
 
     if (view !== "rest") return
 
-    // 2. Canlı etkinlik varsa (medya, çalışan ajan vb.):
-    var baskaSeyVar = live.anaEtkinlik && live.ana !== "kurulum"
+    // 2. If there is a live activity (media, working agent etc.):
+    var hasActivity = live.mainActivity && live.main !== "setup"
 
-    if (baskaSeyVar) {
-      if (live.ana === "kota") {
-        root.aiQuota.kapat()
+    if (hasActivity) {
+      if (live.main === "quota") {
+        root.aiQuota.dismiss()
         if (right) view = "controls"
         else if (viewAllowed("dev") && settings.aiQuota) openDev("ai")
         return
@@ -199,19 +199,19 @@ Item {
       if (right) {
         view = "controls"
       } else {
-        openActivity(live.anaEtkinlik)
+        openActivity(live.mainActivity)
       }
       return
     }
 
-    // 3. Sadece saat varsa:
+    // 3. Only the clock:
     if (right) {
       if (viewAllowed("calendar")) view = "calendar"
       return
     }
 
     if (setup.needsSetup) setup.pillClicked()
-    else if (quotaPill) aiQuota.kapat()
+    else if (quotaPill) aiQuota.dismiss()
     else view = "controls"
   }
 
@@ -311,7 +311,7 @@ Item {
   }
 
 
-  // Takvim verisi: takvim görünümü ve "sıradaki etkinlik" hapı paylaşır.
+  // Calendar data: shared by the calendar view and the "next event" pill.
   readonly property var calendar: calendarEvents
   CalendarEvents {
     id: calendarEvents
@@ -320,14 +320,14 @@ Item {
     now: root.clockDate
   }
   readonly property bool devEnabled: !!(settings.aiQuota || settings.githubPrs || settings.devPorts || settings.docker)
-  // Modülü kapalı görünüm açılmaz.
+  // A view whose module is off does not open.
   function viewAllowed(name) {
     if (name === "calendar") return !!settings.calendar
     if (name === "dev") return devEnabled
     return true
   }
-  // Bir saat içinde etkinlik varsa dinlenme hâlinde küçük canlı etkinlik.
-  readonly property bool eventPill: live.ana === "takvim"
+  // A small live activity at rest when an event starts within the hour.
+  readonly property bool eventPill: live.main === "calendar"
 
   readonly property var clipboard: clipboardWatcher
   ClipboardWatcher {
@@ -359,23 +359,24 @@ Item {
 
   function surfaceOpenFor(v) { return surfaceNames.indexOf(v) !== -1 }
 
-  // Bir görünüm (yüzey) kapanırken island eski yumuşak inişle küçülür;
-  // canlı etkinlik geçişlerindeki yay eğrisi yalnızca bunun dışında.
-  property string oncekiGorunum: "rest"
-  property bool yuzeyKapaniyor: false
+  // When a view (surface) closes the island shrinks with the old soft
+  // landing; the spring curve of live activity transitions applies only
+  // outside of that.
+  property string previousView: "rest"
+  property bool surfaceClosing: false
   Timer {
-    id: yuzeyKapanisTimer
+    id: surfaceCloseTimer
     interval: root.theme.motionDuration("collapse")
-    onTriggered: root.yuzeyKapaniyor = false
+    onTriggered: root.surfaceClosing = false
   }
-  readonly property bool canliGecis: !surfaceOpen && !yuzeyKapaniyor
+  readonly property bool liveTransition: !surfaceOpen && !surfaceClosing
 
   onViewChanged: {
-    if (surfaceOpenFor(oncekiGorunum) && !surfaceOpenFor(view)) {
-      yuzeyKapaniyor = true
-      yuzeyKapanisTimer.restart()
+    if (surfaceOpenFor(previousView) && !surfaceOpenFor(view)) {
+      surfaceClosing = true
+      surfaceCloseTimer.restart()
     }
-    oncekiGorunum = view
+    previousView = view
     if (view === "rest" && updateAnnouncePending) Qt.callLater(announceUpdate)
     surfaceContentReady = false
     if (surfaceOpenFor(view)) surfaceRevealTimer.restart()
@@ -508,7 +509,7 @@ Item {
     function clipboard(): string { return root.toggleView("clipboard") }
     function emoji(): string { return root.toggleView("emoji") }
     function dismissQuota(): string {
-      root.aiQuota.kapat()
+      root.aiQuota.dismiss()
       return "ok"
     }
     function apps(): string { return root.toggleView("apps") }
@@ -530,43 +531,44 @@ Item {
       root.view = "rest"
       return "rest"
     }
-    // Kodlama ajanı durumu (aiAgents modülü): ajan = claude|agy|gemini|codex,
-    // durum = working|waiting|done|idle, oturum = oturum kimliği.
+    // Coding agent state (aiAgents module): name = claude|agy|gemini|codex,
+    // state = working|waiting|done|idle, session = session id.
     function agent(name: string, state: string, session: string): string {
-      return root.agents.bildir(name, state, session)
+      return root.agents.report(name, state, session)
     }
-    // Kabarcık ile ana island'ın yerini değiştir (kabarcık tıklamasıyla aynı
-    // işlev): hedef = etkinlik kimliği (medya, ajan, kota…) ya da kabarcık
-    // sırası (0, 1). Dönüş: yeni ana etkinlik.
+    // Swap a bubble with the main island (same function as a bubble click):
+    // target = activity id (media, agent, calendar…) or bubble index (0, 1).
+    // Returns the new main activity.
     function swap(target: string): string {
-      return root.live.degistir(target)
+      return root.live.swap(target)
     }
-    // Teşhis: giriş maskesindeki island ve görünür kabarcık dikdörtgenleri
-    // (sahne koordinatları; kabarcık fare tıklamasının hedefi bunlardır).
+    // Diagnostics: the island and visible bubble rectangles in the input mask
+    // (scene coordinates; these are the targets of bubble mouse clicks).
     function regions(): string {
-      return root.girisBolgeleri ? root.girisBolgeleri() : "error: no window"
+      return root.inputRegions ? root.inputRegions() : "error: no window"
     }
-    // Island'a tıklama (fareyle aynı işlev): "left" ya da "right".
+    // The main activity, the pinned one and the resolved main id.
     function currentActivity(): string {
-      return (root.live.anaEtkinlik ? root.live.anaEtkinlik.id : "none") + " (pinned=" + root.live.sabit + ", main=" + root.live.ana + ")"
+      return (root.live.mainActivity ? root.live.mainActivity.id : "none") + " (pinned=" + root.live.pinned + ", main=" + root.live.main + ")"
     }
+    // A click on the island (same function as the mouse): "left" or "right".
     function click(button: string): string {
       if (button !== "left" && button !== "right") return "error: left|right"
       root.islandClick(button === "right")
       return root.view
     }
-    // Kota uyarısını kapat (uyarıya tıklamakla aynı işlev).
+    // Close the quota alert (same function as clicking the alert).
     function dismiss(): string {
-      var vardi = !!root.aiQuota.alarm
-      root.aiQuota.kapat()
-      return vardi ? "dismissed" : "no alert"
+      var existed = !!root.aiQuota.alert
+      root.aiQuota.dismiss()
+      return existed ? "dismissed" : "no alert"
     }
   }
 
   // An open view closes on a click outside the island (see outsideArea),
   // armed a moment after it opens so the click that opened it can't count.
-  // Görünür pencerenin giriş bölgesi özeti (teşhis; bkz. IPC regions).
-  property var girisBolgeleri: null
+  // Summary of the visible window's input regions (diagnostics; see IPC regions).
+  property var inputRegions: null
   property bool outsideClickArmed: false
   readonly property bool closesOnOutsideClick: surfaceOpen && outsideClickArmed
   Timer {
@@ -583,22 +585,21 @@ Item {
         required property var modelData
         screen: modelData
         visible: modelData.name === root.outputName
-        // Kabarcık nesneleri (kimlik başına bir tane; bkz.
-        // LiveActivities.kabarcikKimlikleri). KÖK NEDEN: Repeater `count`
-        // değiştiğinde temsilciler henüz kurulmamış oluyor, itemAt() null
-        // dönüyor ve itemAt'a bağlı bağlama bir daha hiç yeniden
-        // hesaplanmıyordu; maske kabarcıkları hiç içermiyordu. Liste artık
-        // Repeater'ın itemAdded/itemRemoved sinyalleriyle dolduruluyor.
-        property var kabarciklar: []
-        // i. kabarcık görünürse kendisi, değilse null.
-        function kabarcik(i) {
-          var b = kabarciklar[i] || null
+        // Bubble objects (one per id; see LiveActivities.bubbleIds).
+        // ROOT CAUSE: when the Repeater's `count` changed the delegates were
+        // not built yet, itemAt() returned null and a binding on itemAt was
+        // never re-evaluated again; the mask never contained the bubbles. The
+        // list is now filled from the Repeater's itemAdded/itemRemoved signals.
+        property var bubbleItems: []
+        // The i-th bubble if it is visible, otherwise null.
+        function bubbleAt(i) {
+          var b = bubbleItems[i] || null
           return b && b.shown ? b : null
         }
-        readonly property Item kb0: kabarciklar[0] || null
-        readonly property Item kb1: kabarciklar[1] || null
-        readonly property Item kb2: kabarciklar[2] || null
-        readonly property Item kb3: kabarciklar[3] || null
+        readonly property Item kb0: bubbleItems[0] || null
+        readonly property Item kb1: bubbleItems[1] || null
+        readonly property Item kb2: bubbleItems[2] || null
+        readonly property Item kb3: bubbleItems[3] || null
         color: "transparent"
         surfaceFormat.opaque: false
         exclusionMode: ExclusionMode.Ignore
@@ -614,11 +615,11 @@ Item {
         // the click. The click that closes the view goes no further.
         mask: Region {
           item: (root.isFullscreen && root.view === "rest") ? null : (root.closesOnOutsideClick ? outsideArea : island)
-          // Görünen canlı etkinlik kabarcıkları da tıklanabilir. `item:` ile
-          // bağlanan alt bölgeler canlı güncellenmiyordu (gerçek fare
-          // kabarcığa hiç ulaşmıyordu); bu yüzden her kabarcık için sabit bir
-          // Region, geometrisi doğrudan kabarcığa bağlı (kabarcıklar pencereyi
-          // dolduran kabarcikAlani içinde, yani x/y pencere koordinatıdır).
+          // Visible live activity bubbles are clickable too. Child regions
+          // bound with `item:` did not update live (the real mouse never
+          // reached the bubble); so there is one fixed Region per bubble with
+          // its geometry bound directly to the bubble (bubbles live inside
+          // bubbleArea, which fills the window, so x/y are window coordinates).
           Region { id: maskKb0; x: window.kb0 ? window.kb0.x : 0; y: window.kb0 ? window.kb0.y : 0
             width: window.kb0 && window.kb0.shown ? window.kb0.width : 0; height: window.kb0 && window.kb0.shown ? window.kb0.height : 0 }
           Region { id: maskKb1; x: window.kb1 ? window.kb1.x : 0; y: window.kb1 ? window.kb1.y : 0
@@ -628,32 +629,32 @@ Item {
           Region { id: maskKb3; x: window.kb3 ? window.kb3.x : 0; y: window.kb3 ? window.kb3.y : 0
             width: window.kb3 && window.kb3.shown ? window.kb3.width : 0; height: window.kb3 && window.kb3.shown ? window.kb3.height : 0 }
         }
-        // Teşhis (debugInput): maskeye giren ama hiçbir öğenin almadığı
-        // basışları yazar; en altta durur ve olayı tüketmez.
+        // Diagnostics (debugInput): logs presses that enter the mask but are
+        // taken by no item; sits at the bottom and does not consume the event.
         MouseArea {
           anchors.fill: parent
           z: -1
           enabled: root.settings.debugInput && !root.closesOnOutsideClick
           onPressed: function(mouse) {
-            root.girdiLog("orphan press " + Math.round(mouse.x) + "," + Math.round(mouse.y) + " | " + root.girisBolgeleri())
+            root.inputLog("orphan press " + Math.round(mouse.x) + "," + Math.round(mouse.y) + " | " + root.inputRegions())
             mouse.accepted = false
           }
         }
-        // Giriş maskesindeki öğelerin dikdörtgenleri (IPC regions, teşhis).
-        function bolgeler() {
-          var r = "island=" + root.sahneDikdortgen(island)
-          for (var i = 0; i < window.kabarciklar.length; i++) {
-            var b = window.kabarcik(i)
-            if (b) r += " " + b.kimlik + "=" + root.sahneDikdortgen(b)
+        // Rectangles of the items in the input mask (IPC regions, diagnostics).
+        function regions() {
+          var r = "island=" + root.sceneRect(island)
+          for (var i = 0; i < window.bubbleItems.length; i++) {
+            var b = window.bubbleAt(i)
+            if (b) r += " " + b.activityId + "=" + root.sceneRect(b)
           }
-          // Maskedeki kabarcık bölgelerinin kendisi (boş olanlar yazılmaz).
+          // The bubble regions in the mask themselves (empty ones are skipped).
           var m = [maskKb0, maskKb1, maskKb2, maskKb3]
           for (var j = 0; j < m.length; j++)
             if (m[j].width > 0) r += " mask" + j + "=" + m[j].x + "," + m[j].y + " " + m[j].width + "x" + m[j].height
           return r
         }
-        Component.onCompleted: if (visible) root.girisBolgeleri = bolgeler
-        onVisibleChanged: if (visible) root.girisBolgeleri = bolgeler
+        Component.onCompleted: if (visible) root.inputRegions = regions
+        onVisibleChanged: if (visible) root.inputRegions = regions
         MouseArea {
           id: outsideArea
           anchors.fill: parent
@@ -661,7 +662,7 @@ Item {
           acceptedButtons: Qt.AllButtons
           // Clicks on the island's blank space fall through to here too.
           onPressed: function(mouse) {
-            root.girdiLog("outside press " + Math.round(mouse.x) + "," + Math.round(mouse.y))
+            root.inputLog("outside press " + Math.round(mouse.x) + "," + Math.round(mouse.y))
             if (!island.contains(mapToItem(island, mouse.x, mouse.y))) root.view = "rest"
           }
         }
@@ -722,15 +723,15 @@ Item {
             : root.clipboardPill || root.activityPill ? 320
             : root.workspacesPill ? workspacePill.islandWidth
             : root.keyboardPill ? 170 + root.keyboardLayoutCodes.length * 38
-            : root.agentDonePill ? (root.aiQuota.limitler(root.agents.sonBiten) ? 400 : 260)
+            : root.agentDonePill ? (root.aiQuota.limits(root.agents.lastFinished) ? 400 : 260)
             : root.view === "feedback" ? 280
             : root.setup.needsSetup ? (root.setup.warning.length > 24 ? 320 : 250)
             : root.downloadDone ? 360
             : root.downloadActive ? (root.downloads.active ? 240 : 280)
             : root.mediaPill ? 240
-            // Ajan ve takvim haplarında sağdaki saat için ölçülü ek genişlik
-            // (onay beklerken saat yok; bkz. PillClock).
-            : root.agentPill ? (root.agents.bekleyenVar ? 280 : 320)
+            // Measured extra width for the clock on the right of the agent and
+            // calendar pills (no clock while waiting for approval; see PillClock).
+            : root.agentPill ? (root.agents.anyWaiting ? 280 : 320)
             : root.quotaPill ? 250
             : root.eventPill ? 340
             : 100
@@ -758,14 +759,14 @@ Item {
           // Width, height and corners travel together and settle softly.
           property real animatedWidth: targetWidth
           property real animatedHeight: targetHeight
-          // Dinlenme hâlindeki canlı etkinlik değişimlerinde genişlik yeni
-          // içeriğe hafif yaylanarak oturur (Theme "spring"); görünümler
-          // açılıp kapanırken eski yumuşak iniş korunur.
+          // On live activity changes at rest the width settles onto the new
+          // content with a slight spring (Theme "spring"); views opening and
+          // closing keep the old soft landing.
           Behavior on animatedWidth {
             MotionAnimation {
               theme: root.theme
-              pace: root.surfaceOpen ? "morph" : root.canliGecis ? "bubble" : "collapse"
-              curve: root.canliGecis ? "spring" : "morph"
+              pace: root.surfaceOpen ? "morph" : root.liveTransition ? "bubble" : "collapse"
+              curve: root.liveTransition ? "spring" : "morph"
             }
           }
           Behavior on animatedHeight {
@@ -775,16 +776,16 @@ Item {
           height: Math.max(28, animatedHeight)
           Behavior on color { MotionColorAnimation { theme: root.theme } }
 
-          // Adada saat dışında etkinlik varsa: sol tık etkinliğin detayı,
-          // sağ tık kontrol merkezi. Sadece saat varsa: sol tık kontrol merkezi,
-          // sağ tık takvim (bkz. islandClick).
+          // With an activity besides the clock: left click shows the activity's
+          // details, right click the control center. With only the clock: left
+          // click shows the control center, right click the calendar (see islandClick).
           MouseArea {
             anchors.fill: parent
             enabled: root.view === "rest" || root.view === "feedback"
             acceptedButtons: Qt.LeftButton | Qt.RightButton
             onPressed: function(mouse) {
-              root.girdiLog("island press " + (mouse.button === Qt.RightButton ? "right" : "left")
-                + " " + root.sahneDikdortgen(island))
+              root.inputLog("island press " + (mouse.button === Qt.RightButton ? "right" : "left")
+                + " " + root.sceneRect(island))
             }
             onClicked: function(mouse) { root.islandClick(mouse.button === Qt.RightButton) }
           }
@@ -818,30 +819,31 @@ Item {
           Views { id: views; host: root; anchors.fill: parent }
         }
 
-        // Ana island'a sığmayan canlı etkinlikler: island'ın sağında 1.,
-        // solunda 2. küçük kabarcık. Island'dan sonra gelir ki üstünde çizilsin
-        // (island'dan ayrılırken/emilirken kenarla birleşik görünür).
+        // Live activities that do not fit on the main island: small bubble 1
+        // to the right of the island, bubble 2 to its left. Declared after the
+        // island so it is drawn on top (it looks joined to the edge while
+        // splitting off / being absorbed).
         Item {
-          id: kabarcikAlani
+          id: bubbleArea
           anchors.fill: parent
-          // Kabarcıklar ve onların MouseArea'ları her zaman island'ın üstünde.
+          // Bubbles and their MouseAreas are always above the island.
           z: 2
-          // Temsilcinin kendi "island" özelliğiyle çakışmasın diye.
-          readonly property Item ada: island
+          // So it does not clash with the delegate's own "island" property.
+          readonly property Item islandItem: island
           Repeater {
-            id: kabarcikRep
-            model: root.live.kabarcikKimlikleri
+            id: bubbleRepeater
+            model: root.live.bubbleIds
             onItemAdded: function(index, item) {
-              var a = window.kabarciklar.slice(); a[index] = item; window.kabarciklar = a
+              var a = window.bubbleItems.slice(); a[index] = item; window.bubbleItems = a
             }
             onItemRemoved: function(index, item) {
-              var a = window.kabarciklar.slice(); a[index] = null; window.kabarciklar = a
+              var a = window.bubbleItems.slice(); a[index] = null; window.bubbleItems = a
             }
             delegate: LiveBubble {
               required property string modelData
               host: root
-              island: kabarcikAlani.ada
-              kimlik: modelData
+              island: bubbleArea.islandItem
+              activityId: modelData
             }
           }
         }

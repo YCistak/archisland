@@ -1,118 +1,119 @@
 import QtQuick
 
-// Kodlama ajanlarının (Claude Code, Antigravity/Gemini, Codex) anlık durumu.
-// Durumu ajanların kancaları (hooks/) island IPC'si üzerinden bildirir:
-//   archisland-shell guilhermerisu.island agent <ajan> <working|waiting|done|idle> <oturum>
-// Her oturum ayrı tutulur; aynı ajanın birden çok oturumu olabilir.
-// "working" bildirimi 5 dakika tazelenmezse oturum bayat sayılıp düşürülür.
+// Live state of coding agents (Claude Code, Antigravity/Gemini, Codex).
+// The agents' hooks (hooks/) report their state over the island IPC:
+//   archisland-shell guilhermerisu.island agent <agent> <working|waiting|done|idle> <session>
+// Each session is tracked separately; one agent can have several sessions.
+// A "working" report that is not refreshed for 5 minutes is considered stale
+// and the session is dropped.
 Item {
   id: agents
   property bool enabled: false
 
-  // Ajan kimliği → görünen ad ve renk.
-  readonly property var adlar: ({ claude: "Claude", agy: "Antigravity", gemini: "Gemini", codex: "Codex" })
-  readonly property var renkler: ({ claude: "#d97757", agy: "#60a5fa", gemini: "#60a5fa", codex: "#9ca3af" })
-  function ad(ajan) { return adlar[ajan] || ajan }
-  function renk(ajan) { return renkler[ajan] || "#e2e6de" }
+  // Agent id → display name and color.
+  readonly property var names: ({ claude: "Claude", agy: "Antigravity", gemini: "Gemini", codex: "Codex" })
+  readonly property var colors: ({ claude: "#d97757", agy: "#60a5fa", gemini: "#60a5fa", codex: "#9ca3af" })
+  function displayName(agent) { return names[agent] || agent }
+  function agentColor(agent) { return colors[agent] || "#e2e6de" }
 
-  // "ajan/oturum" → { ajan, durum: "working"|"waiting", zaman }
-  property var oturumlar: ({})
-  readonly property int bayatSure: 5 * 60 * 1000
+  // "agent/session" → { agent, state: "working"|"waiting", time }
+  property var sessions: ({})
+  readonly property int staleMs: 5 * 60 * 1000
 
-  readonly property var liste: {
+  readonly property var entries: {
     var out = []
-    for (var k in oturumlar) out.push(oturumlar[k])
+    for (var k in sessions) out.push(sessions[k])
     return out
   }
-  readonly property int sayi: liste.length
-  readonly property bool bekleyenVar: liste.some(function(o) { return o.durum === "waiting" })
-  // Tek ajan türü varsa onun adı, karışıksa boş.
-  readonly property string tekAjan: {
+  readonly property int count: entries.length
+  readonly property bool anyWaiting: entries.some(function(o) { return o.state === "waiting" })
+  // The agent's name if only one kind of agent is active, empty if mixed.
+  readonly property string singleAgent: {
     var a = ""
-    for (var i = 0; i < liste.length; i++) {
-      if (a !== "" && a !== liste[i].ajan) return ""
-      a = liste[i].ajan
+    for (var i = 0; i < entries.length; i++) {
+      if (a !== "" && a !== entries[i].agent) return ""
+      a = entries[i].agent
     }
     return a
   }
-  readonly property string ozet: {
-    if (sayi === 0) return ""
-    if (bekleyenVar) {
-      var b = liste.filter(function(o) { return o.durum === "waiting" })[0]
-      return ad(b.ajan) + " needs approval"
+  readonly property string summary: {
+    if (count === 0) return ""
+    if (anyWaiting) {
+      var b = entries.filter(function(o) { return o.state === "waiting" })[0]
+      return displayName(b.agent) + " needs approval"
     }
-    if (sayi === 1) return ad(liste[0].ajan) + " working"
-    return sayi + " agents working"
+    if (count === 1) return displayName(entries[0].agent) + " working"
+    return count + " agents working"
   }
-  readonly property color ozetRenk: tekAjan !== "" ? renk(tekAjan) : "#e2e6de"
+  readonly property color summaryColor: singleAgent !== "" ? agentColor(singleAgent) : "#e2e6de"
 
-  // Son biten ajan: "bitti" banner'ı bunu gösterir.
-  property string sonBiten: ""
-  signal bitti(string ajan)
+  // The agent that finished last: the "done" banner shows it.
+  property string lastFinished: ""
+  signal finished(string agent)
 
-  function oturumListesi() {
+  function sessionList() {
     var out = []
-    for (var k in oturumlar) {
-      var o = oturumlar[k]
-      var sn = Math.round((Date.now() - o.zaman) / 1000)
-      out.push(k + " (" + o.durum + ", " + sn + "s ago)")
+    for (var k in sessions) {
+      var o = sessions[k]
+      var sec = Math.round((Date.now() - o.time) / 1000)
+      out.push(k + " (" + o.state + ", " + sec + "s ago)")
     }
     return out.length ? out.join(", ") : "no active agents"
   }
 
-  function bildir(ajan, durum, oturum) {
-    ajan = String(ajan || "").toLowerCase()
-    durum = String(durum || "").toLowerCase()
-    oturum = String(oturum || "default")
+  function report(agent, state, session) {
+    agent = String(agent || "").toLowerCase()
+    state = String(state || "").toLowerCase()
+    session = String(session || "default")
     if (!enabled) return "disabled"
-    if (durum === "list" || durum === "status" || ajan === "list") {
-      return oturumListesi()
+    if (state === "list" || state === "status" || agent === "list") {
+      return sessionList()
     }
-    if (ajan === "clear" || durum === "clear" || durum === "reset") {
-      oturumlar = ({})
+    if (agent === "clear" || state === "clear" || state === "reset") {
+      sessions = ({})
       return "cleared"
     }
-    if (!ajan) return "error: missing agent name"
-    var anahtar = ajan + "/" + oturum
-    var kopya = Object.assign({}, oturumlar)
-    if (durum === "working" || durum === "waiting") {
-      kopya[anahtar] = { ajan: ajan, durum: durum, zaman: Date.now() }
-    } else if (durum === "done") {
-      var vardi = !!kopya[anahtar]
-      delete kopya[anahtar]
-      oturumlar = kopya
-      sonBiten = ajan
-      bitti(ajan)
-      return vardi ? "done" : "done (unknown session)"
-    } else if (durum === "idle") {
-      if (oturum === "all" || oturum === "*" || oturum === "default") {
-        for (var k in kopya) {
-          if (kopya[k].ajan === ajan) delete kopya[k]
+    if (!agent) return "error: missing agent name"
+    var key = agent + "/" + session
+    var copy = Object.assign({}, sessions)
+    if (state === "working" || state === "waiting") {
+      copy[key] = { agent: agent, state: state, time: Date.now() }
+    } else if (state === "done") {
+      var existed = !!copy[key]
+      delete copy[key]
+      sessions = copy
+      lastFinished = agent
+      finished(agent)
+      return existed ? "done" : "done (unknown session)"
+    } else if (state === "idle") {
+      if (session === "all" || session === "*" || session === "default") {
+        for (var k in copy) {
+          if (copy[k].agent === agent) delete copy[k]
         }
       } else {
-        delete kopya[anahtar]
+        delete copy[key]
       }
     } else {
       return "error: state must be working|waiting|done|idle|clear|reset"
     }
-    oturumlar = kopya
-    return durum
+    sessions = copy
+    return state
   }
 
-  onEnabledChanged: if (!enabled) oturumlar = ({})
+  onEnabledChanged: if (!enabled) sessions = ({})
 
-  // Bayat oturumları düşür.
+  // Drop stale sessions.
   Timer {
     interval: 15000
     repeat: true
-    running: agents.enabled && agents.sayi > 0
+    running: agents.enabled && agents.count > 0
     onTriggered: {
-      var simdi = Date.now(), kopya = {}, degisti = false
-      for (var k in agents.oturumlar) {
-        if (simdi - agents.oturumlar[k].zaman > agents.bayatSure) degisti = true
-        else kopya[k] = agents.oturumlar[k]
+      var now = Date.now(), copy = {}, changed = false
+      for (var k in agents.sessions) {
+        if (now - agents.sessions[k].time > agents.staleMs) changed = true
+        else copy[k] = agents.sessions[k]
       }
-      if (degisti) agents.oturumlar = kopya
+      if (changed) agents.sessions = copy
     }
   }
 }

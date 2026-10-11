@@ -40,7 +40,7 @@ Item {
   function apply(data) {
     if (!data) return
     if (data.claude) claude = data.claude
-    if (host.aiQuota) host.aiQuota.guncelle(data)
+    if (host.aiQuota) host.aiQuota.ingest(data)
     if (data.antigravity) antigravity = data.antigravity
     if (data.codex) codexSession = data.codex.session || 0
     if (data.docker) containers = data.docker.containers || []
@@ -49,8 +49,8 @@ Item {
   }
 
   Component.onCompleted: {
-    if (host && host.aiQuota && host.aiQuota.veri) {
-      apply(host.aiQuota.veri)
+    if (host && host.aiQuota && host.aiQuota.usage) {
+      apply(host.aiQuota.usage)
     }
     try {
       if (statsCacheFile.text()) {
@@ -76,8 +76,8 @@ Item {
   onActiveChanged: {
     if (active) {
       // Önce hafıza veya diskteki en son veriyi anında uygula (0ms gecikme):
-      if (host && host.aiQuota && host.aiQuota.veri) {
-        apply(host.aiQuota.veri)
+      if (host && host.aiQuota && host.aiQuota.usage) {
+        apply(host.aiQuota.usage)
       }
       try {
         if (statsCacheFile.text()) {

@@ -1,30 +1,31 @@
 import QtQuick
 
-// Kodlama ajanı canlı etkinliği (aiAgents modülü): bir ya da birden çok ajan
-// çalışırken island'ın ana hapı. Solda dönen organik Siri noktaları (onay
-// bekleniyorsa uyarı simgesi), ortada "Claude çalışıyor" / "Antigravity çalışıyor",
-// sağda ajanın canlı maskotu/logosu (Claude animasyonlu maskotu veya Gemini logosu) ve saat.
+// Coding agent live activity (aiAgents module): the island's main pill while
+// one or more agents are working. On the left spinning organic Siri dots (a
+// warning icon when approval is needed), in the middle "Claude working" /
+// "Antigravity working", on the right the agent's live mascot/logo (Claude's
+// animated mascot or the Gemini logo) and the clock.
 LivePill {
   id: pill
   shown: host.agentPill
-  kimlikler: ["ajan", "ajanOnay"]
-  readonly property bool bekliyor: host.agents.bekleyenVar
+  activityIds: ["agent", "agentApproval"]
+  readonly property bool waiting: host.agents.anyWaiting
   readonly property string activeAgent: {
-    if (pill.host.agents.tekAjan) return pill.host.agents.tekAjan
-    if (pill.host.agents.liste && pill.host.agents.liste.length > 0) return pill.host.agents.liste[0].ajan
+    if (pill.host.agents.singleAgent) return pill.host.agents.singleAgent
+    if (pill.host.agents.entries && pill.host.agents.entries.length > 0) return pill.host.agents.entries[0].agent
     return ""
   }
   readonly property bool isClaude: activeAgent === "claude"
   readonly property bool isAgy: activeAgent === "agy" || activeAgent === "gemini"
 
-  // Claude için seçilebilir canlı animasyonlar (tıklandıkça değişir):
-  // 1. laptop (laptop başında kod yazan, ekranında neon syntax akan Clawd)
-  // 2. crabwalk (yan yan yürüyen, kolları ve gövdesi sallanan Clawd)
-  // 3. vibing (mavi kulaklıkla müzik dinleyen, notalar uçuşan Clawd)
-  // 4. celebrate (havaya zıplayan, konfetiler yağan zafer Clawd)
-  // 5. coffee (kahvesini yudumlayan, dumanı tüten düşünceli Clawd)
-  // 6. thinking (gözleri yukarı bakan, düşünce balonu çıkan Clawd)
-  // 7. hammering (sarı baretli çekiçle inşa eden Clawd)
+  // Selectable live animations for Claude (cycle on each click):
+  // 1. laptop (Clawd coding at a laptop, neon syntax scrolling on screen)
+  // 2. crabwalk (Clawd walking sideways, arms and body swaying)
+  // 3. vibing (Clawd listening to music on blue headphones, notes flying)
+  // 4. celebrate (victorious Clawd jumping up, confetti falling)
+  // 5. coffee (thoughtful Clawd sipping a steaming coffee)
+  // 6. thinking (Clawd looking up, a thought bubble appearing)
+  // 7. hammering (Clawd building with a hammer in a yellow hard hat)
   readonly property var claudeAnims: [
     "claude-laptop.gif",
     "claude-crabwalk.gif",
@@ -46,13 +47,13 @@ LivePill {
       anchors.centerIn: parent
       scale: 0.65
       dotColor: pill.isClaude ? "#d97757" : (pill.isAgy ? "#60a5fa" : "#ffffff")
-      visible: !pill.bekliyor
-      running: pill.shown && !pill.bekliyor
+      visible: !pill.waiting
+      running: pill.shown && !pill.waiting
     }
     Rectangle {
       anchors.fill: parent
       radius: 13
-      visible: pill.bekliyor
+      visible: pill.waiting
       color: pill.host.theme.withAlpha(pill.host.theme.urgent, 0.25)
       Text {
         anchors.centerIn: parent
@@ -70,7 +71,7 @@ LivePill {
     anchors.right: agentMark.left
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
-    text: pill.host.agents.ozet
+    text: pill.host.agents.summary
     textFormat: Text.PlainText
     elide: Text.ElideRight
     color: "#e2e6de"
@@ -79,20 +80,20 @@ LivePill {
     font.weight: Font.DemiBold
   }
 
-  // Sağ taraftaki ajan göstergesi: Claude canlı maskotu, Gemini logosu veya durum göstergesi
+  // Agent indicator on the right: Claude's live mascot, the Gemini logo or a state indicator
   Item {
     id: agentMark
-    anchors.right: saat.visible ? saat.left : parent.right
-    anchors.rightMargin: saat.visible ? 10 : 16
+    anchors.right: clock.visible ? clock.left : parent.right
+    anchors.rightMargin: clock.visible ? 10 : 16
     anchors.verticalCenter: parent.verticalCenter
-    width: pill.bekliyor ? 8 : (pill.isClaude ? Math.max(30, claudeMascot.width) : (pill.isAgy ? 19 : 8))
+    width: pill.waiting ? 8 : (pill.isClaude ? Math.max(30, claudeMascot.width) : (pill.isAgy ? 19 : 8))
     height: 24
 
-    // 1. Claude Maskotu (Clawd) - Gerçek canlı GIF animasyonları (Tıklandığında animasyon değişir)
+    // 1. Claude mascot (Clawd) - real animated GIFs (the animation changes on click)
     Item {
       id: claudeBox
       anchors.fill: parent
-      visible: !pill.bekliyor && pill.isClaude
+      visible: !pill.waiting && pill.isClaude
 
       AnimatedImage {
         id: claudeMascot
@@ -114,12 +115,12 @@ LivePill {
       }
     }
 
-    // 2. Gemini / AGY Logosu (Pulsing / parıldayan renkli yıldız)
+    // 2. Gemini / AGY logo (a pulsing, shimmering colored star)
     Item {
       id: geminiBox
       anchors.centerIn: parent
       width: 18; height: 18
-      visible: !pill.bekliyor && pill.isAgy
+      visible: !pill.waiting && pill.isAgy
 
       Image {
         id: geminiLogo
@@ -145,20 +146,20 @@ LivePill {
       }
     }
 
-    // 3. Onay bekleyen ajan (Urgent dot)
+    // 3. Agent waiting for approval (urgent dot)
     Rectangle {
       anchors.centerIn: parent
-      visible: pill.bekliyor
+      visible: pill.waiting
       width: 8; height: 8; radius: 4
       color: pill.host.theme.urgent
     }
 
-    // 4. Diğer veya nötr ajan (soluk alan nokta)
+    // 4. Other or neutral agent (a breathing dot)
     Rectangle {
       anchors.centerIn: parent
-      visible: !pill.bekliyor && !pill.isClaude && !pill.isAgy
+      visible: !pill.waiting && !pill.isClaude && !pill.isAgy
       width: 8; height: 8; radius: 4
-      color: pill.host.agents.ozetRenk
+      color: pill.host.agents.summaryColor
       SequentialAnimation on opacity {
         loops: Animation.Infinite
         running: parent.visible
@@ -169,9 +170,9 @@ LivePill {
   }
 
   PillClock {
-    id: saat
+    id: clock
     host: pill.host
-    visible: !pill.bekliyor
+    visible: !pill.waiting
     anchors.right: parent.right
     anchors.rightMargin: 16
     anchors.verticalCenter: parent.verticalCenter

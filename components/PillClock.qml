@@ -1,11 +1,11 @@
 import QtQuick
 
-// Canlı etkinlik hapının sağ kenarındaki küçük, soluk saat (ör. "2 ajan
-// çalışıyor · 14:32"). Biçim, dinlenme saatiyle aynı clock24h ayarına uyar.
+// A small, faint clock at the right edge of a live activity pill (e.g. "2 agents
+// working · 14:32"). The format follows the same clock24h setting as the resting clock.
 Text {
-  id: saat
+  id: clock
   required property var host
-  // Saatten önceki ince ayraç "·".
+  // The thin "·" separator before the clock.
   text: "·  " + (host.settings.clock24h ? Qt.formatDateTime(host.clockDate, "HH:mm")
     : Qt.formatDateTime(host.clockDate, "h:mm AP").replace(/\s*[AP]M$/i, ""))
   textFormat: Text.PlainText

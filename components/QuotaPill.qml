@@ -1,13 +1,13 @@
 import QtQuick
 
-// AI kota uyarısı (aiQuota modülü): bir kota penceresinde kalan oran
-// island.json'daki aiQuotaWarnPercent eşiğinin altına düşünce ana island'da
-// bir kez görünen hap, ör. "Claude %15 kaldı". Tıklayınca kapanır; tıklanmazsa
-// aiQuotaAlertSeconds sonra kendiliğinden kapanır. Kabarcık olmaz.
+// AI quota alert (aiQuota module): a pill shown once on the main island when
+// the remaining share of a quota window drops below the aiQuotaWarnPercent
+// threshold in island.json, e.g. "Claude 15% left". It closes on click; if not
+// clicked it closes by itself after aiQuotaAlertSeconds. It has no bubble.
 LivePill {
   id: pill
   shown: host.quotaPill
-  kimlikler: ["kota"]
+  activityIds: ["quota"]
 
   Rectangle {
     id: badge
@@ -30,7 +30,7 @@ LivePill {
     anchors.right: parent.right
     anchors.rightMargin: 16
     anchors.verticalCenter: parent.verticalCenter
-    text: pill.host.aiQuota.metin
+    text: pill.host.aiQuota.label
     textFormat: Text.PlainText
     elide: Text.ElideRight
     color: pill.host.theme.urgent
