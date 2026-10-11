@@ -1,0 +1,44 @@
+name: English only
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  english-only:
+    name: English only
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check added lines, PR title and body
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          export LC_ALL=C.UTF-8
+          fail=0
+          chars='[çğıöşüÇĞİÖŞÜ]'
+          if printf '%s' "$PR_TITLE" | grep -Eq "$chars"; then
+            echo "::error::PR title contains non-English characters"; fail=1
+          fi
+          if printf '%s' "$PR_BODY" | grep -Eq "$chars"; then
+            echo "::error::PR description contains non-English characters"; fail=1
+          fi
+          out=$(git diff -U0 --no-color "origin/$BASE_REF...HEAD" -- . ':!core' ':!LICENSE' ':!.github/workflows/english-only.yml' \
+            | awk '
+              /^\+\+\+ b\// { file = substr($0, 7); next }
+              /^@@/ { match($0, /\+[0-9]+/); line = substr($0, RSTART + 1, RLENGTH - 1) + 0; next }
+              /^\+/ { print file ":" line ":" substr($0, 2); line++ }
+            ' | grep -E "$chars" || true)
+          if [ -n "$out" ]; then
+            echo "Added lines containing non-English characters:"
+            echo "$out"
+            fail=1
+          fi
+          exit $fail
