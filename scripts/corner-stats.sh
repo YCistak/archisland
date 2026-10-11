@@ -90,7 +90,7 @@ agy_3p_burn=$(jq -r '.limits[] | select(.group=="3p-5h") | .burnRateText' "$tmpd
 codex_s=$(jq -r '.limits[0].percent // 0' "$tmpdir/codex.json" 2>/dev/null)
 codex_s=$(awk "BEGIN {printf \"%.0f\", ${codex_s:-0} * 100}")
 
-ports_list=$(cat "$tmpdir/ports.json" 2>/dev/null | jq '[.[] | select(.port != "53" and .port != "631" and .port != "5355")]' 2>/dev/null)
+ports_list=$(jq '[.[] | select(.port != "53" and .port != "631" and .port != "5355")]' "$tmpdir/ports.json" 2>/dev/null)
 ports_cnt=$(echo "$ports_list" | jq 'length' 2>/dev/null)
 docker_cnt=$(echo "$docker_raw" | jq '[.[] | select(.state == "running")] | length' 2>/dev/null)
 pr_cnt=$(jq -r '.count // 0' "$tmpdir/gh_prs.json" 2>/dev/null)
