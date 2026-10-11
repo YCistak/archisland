@@ -85,7 +85,7 @@ s_agent() {
   adim "Claude working…"; ada agent claude working demo-1; bekle 4
   adim "Second session started (2 agents)…"; ada agent claude working demo-2; bekle 4
   adim "Claude needs approval…"; ada agent claude waiting demo-1; bekle 4
-  adim "A session finished (limit card)…"; ada agent claude done demo-1; bekle 4
+  adim "A session finished (limit card)…"; ada agent claude "done" demo-1; bekle 4
   adim "Cleaning up…"; ajanlari_temizle; bekle 2
 }
 

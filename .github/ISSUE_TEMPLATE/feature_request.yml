@@ -1,0 +1,55 @@
+name: Feature request
+description: Suggest an idea or improvement
+title: "feat: "
+labels: ["type: feature", "status: needs-triage"]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: ArchIsland version or commit
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Distro
+    validations:
+      required: true
+  - type: input
+    id: hyprland
+    attributes:
+      label: Hyprland version
+    validations:
+      required: true
+  - type: input
+    id: quickshell
+    attributes:
+      label: Quickshell version
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional context
+      description: Screenshots, mockups, related logs.
+    validations:
+      required: false
