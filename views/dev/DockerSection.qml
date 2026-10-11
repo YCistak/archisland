@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// docker modülü: konteynerler; yeniden başlat, durdur/başlat.
+// docker module: containers; restart, stop/start.
 ColumnLayout {
   id: docker
   required property var stats

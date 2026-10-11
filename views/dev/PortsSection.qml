@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// devPorts modülü: dinleyen geliştirme portları; tarayıcıda aç, süreci kapat.
+// devPorts module: listening development ports; open in the browser, kill the process.
 ColumnLayout {
   id: ports
   required property var stats

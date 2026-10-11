@@ -1,13 +1,13 @@
 import QtQuick
 
-// Dinlenme hâlinde "sıradaki etkinlik": bir saat içinde başlayacak takvim
-// etkinliği varsa island küçük bir canlı etkinliğe dönüşür. Tıklayınca
-// takvim görünümü açılır (bkz. Island.qml). Sağ kenarda küçük, soluk saat
-// durur; yer darsa etkinlik adı kısalır.
+// "Next event" at rest: if a calendar event starts within the hour the island
+// turns into a small live activity. A click opens the calendar view (see
+// Island.qml). A small, faint clock sits at the right edge; the event name
+// is shortened when space is tight.
 LivePill {
   id: pill
   shown: host.eventPill
-  kimlikler: ["takvim"]
+  activityIds: ["calendar"]
   readonly property var event: host.calendar.nextEvent
 
   Rectangle {
@@ -41,7 +41,7 @@ LivePill {
   }
   Text {
     id: remaining
-    anchors.right: saat.left
+    anchors.right: clock.left
     anchors.rightMargin: 10
     anchors.verticalCenter: parent.verticalCenter
     text: !pill.event ? "" : pill.event.minutes <= 0 ? "now" : pill.event.minutes + " min"
@@ -52,7 +52,7 @@ LivePill {
     font.features: { "tnum": 1 }
   }
   PillClock {
-    id: saat
+    id: clock
     host: pill.host
     anchors.right: parent.right
     anchors.rightMargin: 16

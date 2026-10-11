@@ -5,16 +5,16 @@ set -uo pipefail
 
 ARCHISLAND_PATH="${ARCHISLAND_PATH:-$HOME/.local/share/archisland}"
 SHELL_BIN="$(command -v archisland-shell || echo "$ARCHISLAND_PATH/bin/archisland-shell")"
-AYAR="${XDG_CONFIG_HOME:-$HOME/.config}/archisland/island.json"
-KAYIT="$HOME/.local/state/archisland/ai-quota-shown.json"
-YEDEK="$(mktemp -d "${TMPDIR:-/tmp}/archisland-demo.XXXXXX")"
+SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/archisland/island.json"
+SHOWN_FILE="$HOME/.local/state/archisland/ai-quota-shown.json"
+BACKUP="$(mktemp -d "${TMPDIR:-/tmp}/archisland-demo.XXXXXX")"
 
-ada() { "$SHELL_BIN" guilhermerisu.island "$@" >/dev/null 2>&1; }
-adim() { printf '\033[1;36m▶ %s\033[0m\n' "$*"; }
-bekle() { sleep "${1:-3}"; }
+island_ipc() { "$SHELL_BIN" guilhermerisu.island "$@" >/dev/null 2>&1; }
+step() { printf '\033[1;36m▶ %s\033[0m\n' "$*"; }
+pause() { sleep "${1:-3}"; }
 
-kullanim() {
-  cat <<'KUL'
+usage() {
+  cat <<'USAGE'
 Usage: island demo [scenario]
 
 Scenarios:
@@ -26,129 +26,129 @@ Scenarios:
   all        Runs everything in order
 
 If interrupted with Ctrl+C, demo sessions and settings are restored.
-KUL
+USAGE
 }
 
-# --- Temizlik ---------------------------------------------------------------
-BASLANGIC_MD=""
-KOTA_DEGISTI=0
-AYAR_YEDEK_VAR=0
-KAYIT_YEDEK_VAR=0
-ANAHTARLAR_VARDI=0
+# --- Cleanup ----------------------------------------------------------------
+START_WS=""
+QUOTA_CHANGED=0
+SETTINGS_BACKED_UP=0
+SHOWN_BACKED_UP=0
+KEYS_EXISTED=0
 
-ajanlari_temizle() {
+clear_agents() {
   local o
   for o in demo-1 demo-2 demo-3; do
-    ada agent claude idle "$o"
-    ada agent agy idle "$o"
+    island_ipc agent claude idle "$o"
+    island_ipc agent agy idle "$o"
   done
 }
 
-kotayi_geri_yukle() {
-  ((KOTA_DEGISTI)) || return 0
-  if ((AYAR_YEDEK_VAR)); then
-    if ((ANAHTARLAR_VARDI == 0)); then
-      # Ayar yükleyici silinen anahtarı bellekte tutar: önce varsayılanları yaz,
-      # yüklenmesini bekle, sonra dosyayı aynen geri koy.
-      jq '. + {aiQuotaWarnPercent: 20, aiQuotaAlertSeconds: 60}' "$YEDEK/island.json" >"$AYAR.demo.tmp" \
-        && mv "$AYAR.demo.tmp" "$AYAR"
+restore_quota() {
+  ((QUOTA_CHANGED)) || return 0
+  if ((SETTINGS_BACKED_UP)); then
+    if ((KEYS_EXISTED == 0)); then
+      # The settings loader keeps a removed key in memory: write the defaults
+      # first, wait for them to load, then put the file back exactly.
+      jq '. + {aiQuotaWarnPercent: 20, aiQuotaAlertSeconds: 60}' "$BACKUP/island.json" >"$SETTINGS.demo.tmp" \
+        && mv "$SETTINGS.demo.tmp" "$SETTINGS"
       sleep 1.5
     fi
-    cp -p "$YEDEK/island.json" "$AYAR"
+    cp -p "$BACKUP/island.json" "$SETTINGS"
   fi
-  if ((KAYIT_YEDEK_VAR)); then
-    cp -p "$YEDEK/ai-quota-shown.json" "$KAYIT"
+  if ((SHOWN_BACKED_UP)); then
+    cp -p "$BACKUP/ai-quota-shown.json" "$SHOWN_FILE"
   else
-    rm -f "$KAYIT"
+    rm -f "$SHOWN_FILE"
   fi
-  KOTA_DEGISTI=0
+  QUOTA_CHANGED=0
   echo "Settings restored."
 }
 
-temizle() {
+cleanup() {
   trap - INT TERM EXIT
-  ada dismiss
-  ajanlari_temizle
-  ada close
-  kotayi_geri_yukle
-  if [[ -n $BASLANGIC_MD ]] && command -v hyprctl >/dev/null; then
-    hyprctl dispatch "hl.dsp.focus({ workspace = $BASLANGIC_MD })" >/dev/null 2>&1
+  island_ipc dismiss
+  clear_agents
+  island_ipc close
+  restore_quota
+  if [[ -n $START_WS ]] && command -v hyprctl >/dev/null; then
+    hyprctl dispatch "hl.dsp.focus({ workspace = $START_WS })" >/dev/null 2>&1
   fi
-  rm -rf "$YEDEK"
+  rm -rf "$BACKUP"
 }
-kes() { echo; echo "Interrupted, cleaning up…"; exit 130; }
-trap temizle EXIT
-trap kes INT TERM
+interrupt() { echo; echo "Interrupted, cleaning up…"; exit 130; }
+trap cleanup EXIT
+trap interrupt INT TERM
 
-# --- Senaryolar -------------------------------------------------------------
+# --- Scenarios --------------------------------------------------------------
 s_agent() {
-  adim "Claude working…"; ada agent claude working demo-1; bekle 4
-  adim "Second session started (2 agents)…"; ada agent claude working demo-2; bekle 4
-  adim "Claude needs approval…"; ada agent claude waiting demo-1; bekle 4
-  adim "A session finished (limit card)…"; ada agent claude "done" demo-1; bekle 4
-  adim "Cleaning up…"; ajanlari_temizle; bekle 2
+  step "Claude working…"; island_ipc agent claude working demo-1; pause 4
+  step "Second session started (2 agents)…"; island_ipc agent claude working demo-2; pause 4
+  step "Claude needs approval…"; island_ipc agent claude waiting demo-1; pause 4
+  step "A session finished (limit card)…"; island_ipc agent claude "done" demo-1; pause 4
+  step "Cleaning up…"; clear_agents; pause 2
 }
 
 s_bubbles() {
-  adim "Claude working (main island)…"; ada agent claude working demo-1; bekle 3
-  adim "Antigravity is working too (two bubbles)…"; ada agent agy working demo-2; bekle 4
-  adim "Swapping with bubble 0…"; ada swap 0; bekle 4
-  adim "Swapping with bubble 1…"; ada swap 1; bekle 4
-  adim "Cleaning up…"; ajanlari_temizle; bekle 2
+  step "Claude working (main island)…"; island_ipc agent claude working demo-1; pause 3
+  step "Antigravity is working too (two bubbles)…"; island_ipc agent agy working demo-2; pause 4
+  step "Swapping with bubble 0…"; island_ipc swap 0; pause 4
+  step "Swapping with bubble 1…"; island_ipc swap 1; pause 4
+  step "Cleaning up…"; clear_agents; pause 2
 }
 
 s_clicks() {
-  adim "Claude working…"; ada agent claude working demo-1; bekle 3
-  adim "Left click: opening the control center…"; ada click left; bekle 4
-  adim "Closing…"; ada close; bekle 2
-  adim "Right click: opening activity details…"; ada click right; bekle 4
-  adim "Closing…"; ada close; bekle 2
-  adim "Cleaning up…"; ajanlari_temizle; bekle 2
+  step "Claude working…"; island_ipc agent claude working demo-1; pause 3
+  step "Left click: opening the control center…"; island_ipc click left; pause 4
+  step "Closing…"; island_ipc close; pause 2
+  step "Right click: opening activity details…"; island_ipc click right; pause 4
+  step "Closing…"; island_ipc close; pause 2
+  step "Cleaning up…"; clear_agents; pause 2
 }
 
 s_quota() {
-  if [[ ! -f $AYAR ]]; then echo "island.json not found, quota scenario skipped." >&2; return 1; fi
-  cp -p "$AYAR" "$YEDEK/island.json"; AYAR_YEDEK_VAR=1
-  if [[ -f $KAYIT ]]; then cp -p "$KAYIT" "$YEDEK/ai-quota-shown.json"; KAYIT_YEDEK_VAR=1; fi
-  jq -e 'has("aiQuotaWarnPercent") and has("aiQuotaAlertSeconds")' "$AYAR" >/dev/null 2>&1 \
-    && ANAHTARLAR_VARDI=1 || ANAHTARLAR_VARDI=0
-  KOTA_DEGISTI=1
+  if [[ ! -f $SETTINGS ]]; then echo "island.json not found, quota scenario skipped." >&2; return 1; fi
+  cp -p "$SETTINGS" "$BACKUP/island.json"; SETTINGS_BACKED_UP=1
+  if [[ -f $SHOWN_FILE ]]; then cp -p "$SHOWN_FILE" "$BACKUP/ai-quota-shown.json"; SHOWN_BACKED_UP=1; fi
+  jq -e 'has("aiQuotaWarnPercent") and has("aiQuotaAlertSeconds")' "$SETTINGS" >/dev/null 2>&1 \
+    && KEYS_EXISTED=1 || KEYS_EXISTED=0
+  QUOTA_CHANGED=1
 
-  adim "Setting threshold to 99% and alert duration to 8 s; resetting the shown record…"
-  echo '{}' >"$KAYIT"
-  jq '. + {aiQuotaWarnPercent: 99, aiQuotaAlertSeconds: 8}' "$YEDEK/island.json" >"$AYAR.demo.tmp" \
-    && mv "$AYAR.demo.tmp" "$AYAR"
-  bekle 3
-  adim "Waiting for the quota alert; it closes by itself after 8 s…"; bekle 11
-  adim "Resetting the record; the alert will show once more…"
-  echo '{}' >"$KAYIT"; bekle 4
-  adim "Dismissing as if the alert was clicked (dismiss)…"; ada dismiss; bekle 3
-  adim "Restoring settings…"; kotayi_geri_yukle; bekle 2
+  step "Setting threshold to 99% and alert duration to 8 s; resetting the shown record…"
+  echo '{}' >"$SHOWN_FILE"
+  jq '. + {aiQuotaWarnPercent: 99, aiQuotaAlertSeconds: 8}' "$BACKUP/island.json" >"$SETTINGS.demo.tmp" \
+    && mv "$SETTINGS.demo.tmp" "$SETTINGS"
+  pause 3
+  step "Waiting for the quota alert; it closes by itself after 8 s…"; pause 11
+  step "Resetting the record; the alert will show once more…"
+  echo '{}' >"$SHOWN_FILE"; pause 4
+  step "Dismissing as if the alert was clicked (dismiss)…"; island_ipc dismiss; pause 3
+  step "Restoring settings…"; restore_quota; pause 2
 }
 
 s_workspaces() {
   command -v hyprctl >/dev/null || { echo "hyprctl not found, workspaces scenario skipped." >&2; return 1; }
-  [[ -n $BASLANGIC_MD ]] || BASLANGIC_MD="$(hyprctl activeworkspace -j | jq -r '.id')"
-  local dolu bos=9 hedef
-  mapfile -t dolu < <(hyprctl workspaces -j | jq -r '[.[]|select(.id>0 and .windows>0)|.id]|sort|.[]' | head -3)
-  while hyprctl workspaces -j | jq -e --argjson b "$bos" '.[]|select(.id==$b and .windows>0)' >/dev/null; do bos=$((bos+1)); done
-  adim "Starting workspace: $BASLANGIC_MD"
-  for hedef in "${dolu[@]}" "$bos"; do
-    if [[ $hedef == "$bos" ]]; then adim "Empty workspace $hedef…"; else adim "Workspace $hedef…"; fi
-    hyprctl dispatch "hl.dsp.focus({ workspace = $hedef })" >/dev/null 2>&1; bekle 2.5
+  [[ -n $START_WS ]] || START_WS="$(hyprctl activeworkspace -j | jq -r '.id')"
+  local occupied empty=9 target
+  mapfile -t occupied < <(hyprctl workspaces -j | jq -r '[.[]|select(.id>0 and .windows>0)|.id]|sort|.[]' | head -3)
+  while hyprctl workspaces -j | jq -e --argjson b "$empty" '.[]|select(.id==$b and .windows>0)' >/dev/null; do empty=$((empty+1)); done
+  step "Starting workspace: $START_WS"
+  for target in "${occupied[@]}" "$empty"; do
+    if [[ $target == "$empty" ]]; then step "Empty workspace $target…"; else step "Workspace $target…"; fi
+    hyprctl dispatch "hl.dsp.focus({ workspace = $target })" >/dev/null 2>&1; pause 2.5
   done
-  adim "Returning to start: $BASLANGIC_MD"
-  hyprctl dispatch "hl.dsp.focus({ workspace = $BASLANGIC_MD })" >/dev/null 2>&1; bekle 2
+  step "Returning to start: $START_WS"
+  hyprctl dispatch "hl.dsp.focus({ workspace = $START_WS })" >/dev/null 2>&1; pause 2
 }
 
 s_all() { s_agent; s_bubbles; s_clicks; s_quota; s_workspaces; }
 
-# --- Giriş ------------------------------------------------------------------
+# --- Entry point ------------------------------------------------------------
 case "${1:-}" in
-  "" | -h | --help | help) kullanim ;;
+  "" | -h | --help | help) usage ;;
   agent | bubbles | clicks | quota | workspaces | all)
-    command -v hyprctl >/dev/null && BASLANGIC_MD="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty')"
+    command -v hyprctl >/dev/null && START_WS="$(hyprctl activeworkspace -j 2>/dev/null | jq -r '.id // empty')"
     "s_$1"
     ;;
-  *) echo "Unknown scenario: $1" >&2; echo >&2; kullanim >&2; exit 1 ;;
+  *) echo "Unknown scenario: $1" >&2; echo >&2; usage >&2; exit 1 ;;
 esac

@@ -8,7 +8,7 @@ import Quickshell.Widgets
 LivePill {
   id: media
   shown: host.mediaPill
-  kimlikler: ["medya"]
+  activityIds: ["media"]
 
   ClippingRectangle {
     id: art

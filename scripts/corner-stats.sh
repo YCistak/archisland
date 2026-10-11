@@ -4,14 +4,14 @@ export PATH="$DIR:$HOME/.config/archisland/scripts:$HOME/.local/bin:/usr/local/b
 
 tmpdir=$(mktemp -d /tmp/cs-XXXXXX)
 
-# ARCHISLAND_MODULES="ai,docker,ports,pr": yalnız açık modüllerin verisi toplanır.
-# Tanımsızsa (ör. `island stats`) hepsi toplanır.
-modul_acik() {
+# ARCHISLAND_MODULES="ai,docker,ports,pr": only data for enabled modules is collected.
+# If unset (e.g. `island stats`) everything is collected.
+module_enabled() {
   [[ -z ${ARCHISLAND_MODULES+x} ]] && return 0
   [[ ",$ARCHISLAND_MODULES," == *",$1,"* ]]
 }
 
-if modul_acik ai && command -v archisland-agent-usage-claude >/dev/null 2>&1; then
+if module_enabled ai && command -v archisland-agent-usage-claude >/dev/null 2>&1; then
   archisland-agent-usage-claude 2>/dev/null > "$tmpdir/claude.json" &
 fi
 pid1=$!
@@ -25,12 +25,12 @@ else
   AGY_BIN=$(find "$HOME/.config" -name "archisland-agent-usage-antigravity" -o -name "agent-agy.py" 2>/dev/null | head -n1)
 fi
 
-if modul_acik ai && [[ -n "$AGY_BIN" && -x "$AGY_BIN" ]]; then
+if module_enabled ai && [[ -n "$AGY_BIN" && -x "$AGY_BIN" ]]; then
   "$AGY_BIN" 2>/dev/null > "$tmpdir/agy.json" &
 fi
 pid2=$!
 
-if modul_acik ai && command -v archisland-agent-usage-codex >/dev/null 2>&1; then
+if module_enabled ai && command -v archisland-agent-usage-codex >/dev/null 2>&1; then
   archisland-agent-usage-codex 2>/dev/null > "$tmpdir/codex.json" &
 fi
 pid3=$!
@@ -44,7 +44,7 @@ else
   PORTS_BIN=$(find "$HOME/.config" -name "list-ports.sh" 2>/dev/null | head -n1)
 fi
 
-if modul_acik ports && [[ -n "$PORTS_BIN" && -x "$PORTS_BIN" ]]; then
+if module_enabled ports && [[ -n "$PORTS_BIN" && -x "$PORTS_BIN" ]]; then
   "$PORTS_BIN" 2>/dev/null > "$tmpdir/ports.json" &
 fi
 pid4=$!
@@ -58,13 +58,13 @@ else
   GH_PR_BIN=$(find "$HOME/.config" -name "gh-pr.sh" 2>/dev/null | head -n1)
 fi
 
-if modul_acik pr && [[ -n "$GH_PR_BIN" && -x "$GH_PR_BIN" ]]; then
+if module_enabled pr && [[ -n "$GH_PR_BIN" && -x "$GH_PR_BIN" ]]; then
   "$GH_PR_BIN" summary 2>/dev/null > "$tmpdir/gh_prs.json" &
 fi
 pid5=$!
 
 docker_raw="[]"
-modul_acik docker && docker_raw=$(docker ps -a --format '{"name":"{{.Names}}","image":"{{.Image}}","status":"{{.Status}}","state":"{{.State}}"}' 2>/dev/null | jq -s '.' 2>/dev/null)
+module_enabled docker && docker_raw=$(docker ps -a --format '{"name":"{{.Names}}","image":"{{.Image}}","status":"{{.Status}}","state":"{{.State}}"}' 2>/dev/null | jq -s '.' 2>/dev/null)
 
 wait $pid1 $pid2 $pid3 $pid4 $pid5 2>/dev/null
 

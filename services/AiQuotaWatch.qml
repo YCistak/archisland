@@ -3,50 +3,51 @@ import Quickshell
 import Quickshell.Io
 import "../lib/Scripts.js" as Scripts
 
-// AI kota uyarısı (aiQuota modülü): Claude, Antigravity ve Codex kotası
-// arka planda 5 dakikada bir yoklanır (scripts/corner-stats.sh, yalnız "ai").
-// Herhangi bir pencerede (5 saatlik/haftalık) kalan oran island.json'daki
-// aiQuotaWarnPercent eşiğinin altına düşünce `alarm` dolar. Uyarı TEK
-// SEFERLİKTİR: ana island'da görünür, tıklanınca (kapat) ya da süresi
-// (aiQuotaAlertSeconds) dolunca kapanır ve o ajan için bir daha çıkmaz.
-// Kota eşiğin üstüne çıkarsa (yenilenirse) ajanın "gösterildi" kaydı silinir,
-// tekrar altına düşünce uyarı yeniden çıkar. Kayıt shell yeniden başlasa da
-// kalsın diye ~/.local/state/archisland/ai-quota-shown.json dosyasında tutulur.
-// Geliştirici görünümü açıkken gelen taze veri de `guncelle` ile aktarılır.
+// AI quota alert (aiQuota module): Claude, Antigravity and Codex quota is
+// polled in the background every 5 minutes (scripts/corner-stats.sh, "ai" only).
+// When the remaining share of any window (5-hour/weekly) drops below the
+// aiQuotaWarnPercent threshold in island.json, `alert` is set. The alert is
+// ONE-SHOT: it appears on the main island and closes on click (dismiss) or
+// when its time (aiQuotaAlertSeconds) runs out, and never shows again for that
+// agent. If the quota rises above the threshold (resets), the agent's "shown"
+// record is removed, and the alert shows again when it drops below once more.
+// The record is kept in ~/.local/state/archisland/ai-quota-shown.json so it
+// survives shell restarts. Fresh data arriving while the developer view is
+// open is passed in through `ingest` too.
 Item {
   id: quota
   property bool enabled: false
   property string pluginDir: ""
-  property int esik: 20
+  property int threshold: 20
 
-  // Kullanılan yüzdeler (0–100); veri yoksa 0 sayılır, uyarı çıkmaz.
-  property var veri: null
+  // Used percentages (0–100); missing data counts as 0 and raises no alert.
+  property var usage: null
 
-  // Eşiğin altındaki ajanlar: { ajan: { ajan, ad, kalan } } — her ajan için
-  // en az kalan pencere.
-  readonly property var altinda: {
+  // Agents below the threshold: { agent: { agent, name, left } } — the window
+  // with the least left for each agent.
+  readonly property var below: {
     var r = {}
-    if (!enabled || !veri) return r
-    function ekle(ajan, ad, kullanilan) {
-      kullanilan = Number(kullanilan || 0)
-      if (kullanilan <= 0) return
-      var kalan = Math.max(0, 100 - Math.round(kullanilan))
-      if (kalan < esik && (!r[ajan] || kalan < r[ajan].kalan)) r[ajan] = { ajan: ajan, ad: ad, kalan: kalan }
+    if (!enabled || !usage) return r
+    function add(agent, name, used) {
+      used = Number(used || 0)
+      if (used <= 0) return
+      var left = Math.max(0, 100 - Math.round(used))
+      if (left < threshold && (!r[agent] || left < r[agent].left)) r[agent] = { agent: agent, name: name, left: left }
     }
-    var c = veri.claude || {}, a = veri.antigravity || {}, x = veri.codex || {}
-    ekle("claude", "Claude", c.session); ekle("claude", "Claude", c.weekly)
-    ekle("agy", "Antigravity", a.session); ekle("agy", "Antigravity", a.weekly)
-    ekle("codex", "Codex", x.session)
+    var c = usage.claude || {}, a = usage.antigravity || {}, x = usage.codex || {}
+    add("claude", "Claude", c.session); add("claude", "Claude", c.weekly)
+    add("agy", "Antigravity", a.session); add("agy", "Antigravity", a.weekly)
+    add("codex", "Codex", x.session)
     return r
   }
 
-  // Şu an gösterilecek tek seferlik uyarı: { ajan, ad, kalan } ya da null.
-  property var alarm: null
-  // Uyarısı zaten gösterilmiş ajanlar: { ajan: true }.
-  property var gosterilen: ({})
-  readonly property string metin: alarm ? alarm.ad + " " + alarm.kalan + "% left" : ""
+  // The one-shot alert to show right now: { agent, name, left } or null.
+  property var alert: null
+  // Agents whose alert has already been shown: { agent: true }.
+  property var shown: ({})
+  readonly property string label: alert ? alert.name + " " + alert.left + "% left" : ""
 
-  readonly property string kayitYolu: Quickshell.env("HOME") + "/.local/state/archisland/ai-quota-shown.json"
+  readonly property string shownPath: Quickshell.env("HOME") + "/.local/state/archisland/ai-quota-shown.json"
   FileView {
     id: statsCache
     path: "/tmp/archisland-corner-stats.json"
@@ -56,78 +57,80 @@ Item {
       try {
         var d = JSON.parse(text())
         if (d && (d.claude || d.antigravity || d.codex)) {
-          quota.veri = d
-          quota.degerlendir()
+          quota.usage = d
+          quota.evaluate()
         }
       } catch (e) {}
     }
   }
 
   FileView {
-    id: kayit
-    path: quota.kayitYolu
+    id: shownFile
+    path: quota.shownPath
     blockLoading: true
     atomicWrites: true
     printErrors: false
     onLoaded: {
       try {
         var g = JSON.parse(text())
-        if (g && typeof g === "object") quota.gosterilen = g
+        if (g && typeof g === "object") quota.shown = g
       } catch (e) {}
-      quota.degerlendir()
+      quota.evaluate()
     }
   }
-  function kaydet() {
-    kayit.setText(JSON.stringify(gosterilen) + "\n")
+  function saveShown() {
+    shownFile.setText(JSON.stringify(shown) + "\n")
   }
 
-  // Eşiği aşan ajanların kaydını sil, gerekirse sıradaki uyarıyı seç.
-  function degerlendir() {
-    // Veri henüz yokken (açılışta ilk yoklama gelmeden) "eşiğin üstünde"
-    // sayılıp kayıt silinmesin; yoksa her yeniden başlatmada uyarı tekrar
-    // çıkar ve ana island'ı kilitler (kabarcık tıklaması işe yaramaz).
-    if (!enabled || !veri) return
-    var g = Object.assign({}, gosterilen), degisti = false
-    for (var k in g) if (!altinda[k]) { delete g[k]; degisti = true }
-    if (degisti) { gosterilen = g; kaydet() }
-    if (alarm && !altinda[alarm.ajan]) alarm = null
-    if (alarm) return
-    for (var ajan in altinda) if (!gosterilen[ajan]) { alarm = altinda[ajan]; return }
+  // Remove the record of agents back above the threshold and pick the next
+  // alert if needed.
+  function evaluate() {
+    // While there is no data yet (at startup, before the first poll) do not
+    // treat everything as "above the threshold" and wipe the record;
+    // otherwise the alert shows again after every restart and locks the main
+    // island (bubble clicks stop working).
+    if (!enabled || !usage) return
+    var g = Object.assign({}, shown), changed = false
+    for (var k in g) if (!below[k]) { delete g[k]; changed = true }
+    if (changed) { shown = g; saveShown() }
+    if (alert && !below[alert.agent]) alert = null
+    if (alert) return
+    for (var agent in below) if (!shown[agent]) { alert = below[agent]; return }
   }
-  onAltindaChanged: degerlendir()
+  onBelowChanged: evaluate()
 
-  // Uyarıyı kapat (tıklama ya da süre dolması): bu ajan için bir daha çıkmaz.
-  function kapat() {
-    if (!alarm) return
-    var g = Object.assign({}, gosterilen)
-    g[alarm.ajan] = true
-    gosterilen = g
-    kaydet()
-    alarm = null
-    degerlendir()
+  // Close the alert (click or timeout): it never shows again for this agent.
+  function dismiss() {
+    if (!alert) return
+    var g = Object.assign({}, shown)
+    g[alert.agent] = true
+    shown = g
+    saveShown()
+    alert = null
+    evaluate()
   }
 
-  // Bir ajanın kullanım yüzdeleri (ajan bitti kartı için):
-  // { oturum, haftalik } — haftalik yoksa -1; veri/modül yoksa null.
-  function limitler(ajan) {
-    if (!enabled || !veri) return null
-    var d = ajan === "claude" ? veri.claude
-      : ajan === "agy" || ajan === "gemini" ? veri.antigravity
-      : ajan === "codex" ? veri.codex : null
+  // An agent's usage percentages (for the agent done card):
+  // { session, weekly } — weekly is -1 when missing; null without data/module.
+  function limits(agent) {
+    if (!enabled || !usage) return null
+    var d = agent === "claude" ? usage.claude
+      : agent === "agy" || agent === "gemini" ? usage.antigravity
+      : agent === "codex" ? usage.codex : null
     if (!d) return null
-    var o = Number(d.session || 0), hf = d.weekly === undefined ? -1 : Number(d.weekly || 0)
-    if (o <= 0 && hf <= 0) return null
-    return { oturum: Math.round(o), haftalik: hf < 0 ? -1 : Math.round(hf) }
+    var s = Number(d.session || 0), w = d.weekly === undefined ? -1 : Number(d.weekly || 0)
+    if (s <= 0 && w <= 0) return null
+    return { session: Math.round(s), weekly: w < 0 ? -1 : Math.round(w) }
   }
 
-  function guncelle(data) {
-    if (data && (data.claude || data.antigravity || data.codex)) veri = data
+  function ingest(data) {
+    if (data && (data.claude || data.antigravity || data.codex)) usage = data
   }
-  function yokla() {
+  function poll() {
     if (enabled && !proc.running) proc.running = true
   }
 
-  onEnabledChanged: if (!enabled) veri = null
+  onEnabledChanged: if (!enabled) usage = null
 
   Process {
     id: proc
@@ -136,7 +139,7 @@ Item {
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
-        try { quota.guncelle(JSON.parse(text)) } catch (e) {}
+        try { quota.ingest(JSON.parse(text)) } catch (e) {}
       }
     }
   }
@@ -145,6 +148,6 @@ Item {
     repeat: true
     running: quota.enabled
     triggeredOnStart: true
-    onTriggered: quota.yokla()
+    onTriggered: quota.poll()
   }
 }

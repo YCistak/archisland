@@ -1,10 +1,10 @@
 {
-  "archisland-ada": {
+  "archisland-island": {
     "PreInvocation": [
-      { "type": "command", "command": "bash __KANCA__ agy working", "timeout": 5 }
+      { "type": "command", "command": "bash __HOOK__ agy working", "timeout": 5 }
     ],
     "Stop": [
-      { "type": "command", "command": "bash __KANCA__ agy done", "timeout": 5 }
+      { "type": "command", "command": "bash __HOOK__ agy done", "timeout": 5 }
     ]
   }
 }

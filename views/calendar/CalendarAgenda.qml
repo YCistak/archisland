@@ -2,8 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// Seçili günün etkinlikleri, yerinde ekleme formu ve silme düğmeleri.
-// Enter kaydeder; Esc görünümü kapatır.
+// The selected day's events, an inline add form and delete buttons.
+// Enter saves; Esc closes the view.
 Rectangle {
   id: agenda
   required property var view
@@ -73,7 +73,7 @@ Rectangle {
       }
     }
 
-    // Ekleme formu: ad, saat (boşsa "All day"), kaydet.
+    // Add form: name, time (empty means "All day"), save.
     RowLayout {
       Layout.fillWidth: true
       visible: agenda.formOpen
@@ -126,7 +126,7 @@ Rectangle {
           }
           Text {
             Layout.fillWidth: true
-            text: row.modelData.summary || "Etkinlik"
+            text: row.modelData.summary || "Event"
             textFormat: Text.PlainText
             elide: Text.ElideRight
             color: agenda.theme.text
@@ -139,7 +139,7 @@ Rectangle {
             implicitWidth: 28; implicitHeight: 28
             label: "󰆴"
             pixelSize: 13
-            tip: "Sil"
+            tip: "Delete"
             ink: rowHover.hovered ? "#ff453a" : agenda.theme.muted
             onClicked: agenda.calendar.remove(row.modelData.id || row.modelData.summary)
           }
@@ -147,7 +147,7 @@ Rectangle {
       }
     }
 
-    // Alt satır: kayıt sayısı ve elle yenileme.
+    // Bottom row: entry count and manual refresh.
     RowLayout {
       Layout.fillWidth: true
       Layout.leftMargin: 4

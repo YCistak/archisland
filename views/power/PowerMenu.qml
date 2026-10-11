@@ -27,7 +27,7 @@ Item {
     var list = [{ label: "Power Off", icon: "󰐥", command: ["sh", "-c", "\"$HOME/.config/archisland/scripts/session-manager.py\" save 2>/dev/null || true; archisland-system-shutdown"] }]
     list.push({ label: "Reboot", icon: "󰜉", command: ["sh", "-c", "\"$HOME/.config/archisland/scripts/session-manager.py\" save 2>/dev/null || true; archisland-system-reboot"] })
     list.push({ label: "Lock", icon: "", command: ["archisland-system-lock"] })
-    list.push({ label: "Save Session", icon: "󰁯", command: ["sh", "-c", "\"$HOME/.config/archisland/scripts/session-manager.py\" save 2>/dev/null || true; notify-send 'ArchIsland' 'Oturum pencereleri kaydedildi.' -i dialog-information 2>/dev/null || true"] })
+    list.push({ label: "Save Session", icon: "󰁯", command: ["sh", "-c", "\"$HOME/.config/archisland/scripts/session-manager.py\" save 2>/dev/null || true; notify-send 'ArchIsland' 'Session windows saved.' -i dialog-information 2>/dev/null || true"] })
     if (hibernateAvailable) list.push({ label: "Hibernate", icon: "󰤁", command: ["systemctl", "hibernate"] })
     if (suspendAvailable) list.push({ label: "Suspend", icon: "󰖔", command: ["systemctl", "suspend"] })
     return list

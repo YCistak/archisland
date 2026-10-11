@@ -2,56 +2,56 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 
-// Bir masaüstünün (çalışma alanı) baskın uygulamasını, pencere sınıfından
-// uygulama adı ve simgesiyle çözer.
+// Resolves a workspace's dominant app from its window class into an app name
+// and icon.
 QtObject {
   id: model
 
-  // Masaüstü girdileri geç yüklenebilir; okuyan bağlamalar yüklenince yenilensin.
-  readonly property var kayitlar: DesktopEntries.applications.values
+  // Desktop entries may load late; bindings reading them refresh once loaded.
+  readonly property var entries: DesktopEntries.applications.values
 
-  // Masaüstünün simge için seçilen uygulaması: en büyük pencere (eşitse ilki).
-  // { cls, name, icon } ya da pencere yoksa null.
-  function baskin(ws) {
-    void model.kayitlar
+  // The app chosen for a workspace's icon: the largest window (first on a tie).
+  // { cls, name, icon } or null if the workspace has no windows.
+  function dominant(ws) {
+    void model.entries
     if (!ws) return null
-    var pencereler = ws.toplevels.values
-    var secilen = null
-    var enBuyuk = -1
-    for (var i = 0; i < pencereler.length; i++) {
-      var cls = model.sinifOf(pencereler[i])
+    var windows = ws.toplevels.values
+    var chosen = null
+    var largest = -1
+    for (var i = 0; i < windows.length; i++) {
+      var cls = model.classOf(windows[i])
       if (cls === "") continue
-      var ipc = pencereler[i].lastIpcObject
-      var alan = ipc && ipc.size ? ipc.size[0] * ipc.size[1] : 0
-      if (alan > enBuyuk) { enBuyuk = alan; secilen = cls }
+      var ipc = windows[i].lastIpcObject
+      var area = ipc && ipc.size ? ipc.size[0] * ipc.size[1] : 0
+      if (area > largest) { largest = area; chosen = cls }
     }
-    return secilen === null ? null : model.coz(secilen)
+    return chosen === null ? null : model.resolve(chosen)
   }
 
-  function sinifOf(pencere) {
-    if (!pencere) return ""
-    if (pencere.wayland && pencere.wayland.appId) return String(pencere.wayland.appId)
-    var ipc = pencere.lastIpcObject
+  function classOf(window) {
+    if (!window) return ""
+    if (window.wayland && window.wayland.appId) return String(window.wayland.appId)
+    var ipc = window.lastIpcObject
     return ipc && ipc["class"] ? String(ipc["class"]) : ""
   }
 
   // "org.mozilla.firefox" -> "Firefox", "zen-browser" -> "Zen Browser"
-  function okunurAd(cls) {
-    var son = String(cls).split(".").pop()
-    var sozler = son.split(/[-_ ]+/).filter(function(s) { return s !== "" })
-    return sozler.map(function(s) { return s.charAt(0).toUpperCase() + s.slice(1) }).join(" ")
+  function readableName(cls) {
+    var last = String(cls).split(".").pop()
+    var words = last.split(/[-_ ]+/).filter(function(s) { return s !== "" })
+    return words.map(function(s) { return s.charAt(0).toUpperCase() + s.slice(1) }).join(" ")
   }
 
-  function coz(cls) {
-    var giris = DesktopEntries.byId(cls) || DesktopEntries.heuristicLookup(cls)
-    var simge = ""
-    if (giris && giris.icon) simge = Quickshell.iconPath(giris.icon, true)
-    if (!simge) simge = Quickshell.iconPath(cls, true)
-    if (!simge) simge = Quickshell.iconPath(cls.toLowerCase(), true)
+  function resolve(cls) {
+    var entry = DesktopEntries.byId(cls) || DesktopEntries.heuristicLookup(cls)
+    var icon = ""
+    if (entry && entry.icon) icon = Quickshell.iconPath(entry.icon, true)
+    if (!icon) icon = Quickshell.iconPath(cls, true)
+    if (!icon) icon = Quickshell.iconPath(cls.toLowerCase(), true)
     return {
       cls: cls,
-      name: giris && giris.name ? String(giris.name) : okunurAd(cls),
-      icon: simge || ""
+      name: entry && entry.name ? String(entry.name) : readableName(cls),
+      icon: icon || ""
     }
   }
 }

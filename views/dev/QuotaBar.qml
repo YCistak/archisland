@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// Bir kota satırı: etiket, yüzde ve dolum çubuğu (%80 üstü kırmızı).
+// One quota row: label, percentage and fill bar (red above 80%).
 ColumnLayout {
   id: bar
   required property var theme

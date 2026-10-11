@@ -11,7 +11,7 @@
   "trigger": {"when": "false"},
   "style": {"when": "false"},
 
-  // Trigger altındaki öğeleri ana menüye (root) çıkarma
+  // Move the entries under Trigger up to the main menu (root)
   "trigger.capture": {"parent": "root"},
   "trigger.toggle": {"parent": "root"},
   "trigger.share": {"parent": "root"},
@@ -19,7 +19,7 @@
   "trigger.transcode": {"parent": "root"},
   "trigger.tests": {"parent": "root"},
 
-  // Ana Menü Girdileri
+  // Main menu entries
   "dev": {
     "icon": "",
     "label": "Developer & AI Quota",

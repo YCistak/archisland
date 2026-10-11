@@ -2,9 +2,9 @@ import QtQuick
 import Quickshell.Io
 import "../../lib/Scripts.js" as Scripts
 
-// Geliştirici görünümünün verisi: scripts/corner-stats.sh yalnız görünüm
-// açıkken ve yalnız açık modüller için (ARCHISLAND_MODULES) çalışır.
-// Disk ve bellek önbelleği sayesinde açılışta 0ms gecikmeyle son veriler gösterilir.
+// Developer view data: scripts/corner-stats.sh runs only while the view is
+// open and only for enabled modules (ARCHISLAND_MODULES).
+// Thanks to the disk and memory cache the latest data shows with 0 ms delay on open.
 Item {
   id: stats
   visible: false
@@ -40,7 +40,7 @@ Item {
   function apply(data) {
     if (!data) return
     if (data.claude) claude = data.claude
-    if (host.aiQuota) host.aiQuota.guncelle(data)
+    if (host.aiQuota) host.aiQuota.ingest(data)
     if (data.antigravity) antigravity = data.antigravity
     if (data.codex) codexSession = data.codex.session || 0
     if (data.docker) containers = data.docker.containers || []
@@ -49,8 +49,8 @@ Item {
   }
 
   Component.onCompleted: {
-    if (host && host.aiQuota && host.aiQuota.veri) {
-      apply(host.aiQuota.veri)
+    if (host && host.aiQuota && host.aiQuota.usage) {
+      apply(host.aiQuota.usage)
     }
     try {
       if (statsCacheFile.text()) {
@@ -60,12 +60,12 @@ Item {
     } catch (e) {}
   }
 
-  // PR listesi PrSection'da ayrıca çekilir; burada yalnız kota/docker/port.
+  // The PR list is fetched separately in PrSection; here only quota/docker/ports.
   readonly property bool needsStats: showAi || showDocker || showPorts
   function refresh() {
     if (needsStats && !statsProc.running) statsProc.running = true
   }
-  // Docker/port eylemleri: ayrık çalışır, az sonra veri tazelenir.
+  // Docker/port actions: run detached, the data refreshes shortly after.
   function run(command) {
     actionProc.command = command
     actionProc.startDetached()
@@ -75,9 +75,9 @@ Item {
 
   onActiveChanged: {
     if (active) {
-      // Önce hafıza veya diskteki en son veriyi anında uygula (0ms gecikme):
-      if (host && host.aiQuota && host.aiQuota.veri) {
-        apply(host.aiQuota.veri)
+      // First apply the latest data from memory or disk immediately (0 ms delay):
+      if (host && host.aiQuota && host.aiQuota.usage) {
+        apply(host.aiQuota.usage)
       }
       try {
         if (statsCacheFile.text()) {
@@ -85,7 +85,7 @@ Item {
           if (d) apply(d)
         }
       } catch (e) {}
-      // Arka planda taze veriyi çek
+      // Fetch fresh data in the background
       refresh()
     }
   }
@@ -105,7 +105,7 @@ Item {
   }
   property Process actionProc: Process {}
   property Timer refreshSoon: Timer { interval: 800; onTriggered: stats.refresh() }
-  // Açıkken 15 saniyede bir tazele.
+  // Refresh every 15 seconds while open.
   property Timer poll: Timer {
     interval: 15000
     running: stats.active && stats.needsStats
