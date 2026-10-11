@@ -144,7 +144,7 @@ ColumnLayout {
     }
   }
 
-  // ---------- Yeni PR formu ----------
+  // ---------- New PR form ----------
 
   Rectangle {
     Layout.fillWidth: true
