@@ -75,7 +75,7 @@ case "${1:-}" in
     fi
     ;;
   demo)
-    # Animasyon demosu: island demo [senaryo]
+    # Animation demo: island demo [scenario]
     shift || true
     exec "$SCRIPTS_DIR/demo.sh" "$@"
     ;;
@@ -114,7 +114,7 @@ case "${1:-}" in
     pkill -f "^quickshell -n -p $ARCHISLAND_PATH/shell" 2>/dev/null || true
     ;;
   restart)
-    # Gözetmen (archisland-launch-shell) shell'i yeniden başlatır.
+    # The supervisor (archisland-launch-shell) restarts the shell.
     pkill -f "^quickshell -n -p $ARCHISLAND_PATH/shell" 2>/dev/null || true
     ;;
   *)
