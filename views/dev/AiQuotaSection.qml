@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// aiQuota modülü: Claude Code, Antigravity ve (varsa) Codex kullanım yüzdeleri.
+// aiQuota module: Claude Code, Antigravity and (if present) Codex usage percentages.
 ColumnLayout {
   id: ai
   required property var stats
@@ -16,7 +16,7 @@ ColumnLayout {
     return String(n)
   }
 
-  // Sağlayıcı kartı: başlık satırı ve altında kota çubukları.
+  // Provider card: a header row with the quota bars below it.
   component ProviderCard: Rectangle {
     id: providerCard
     required property var theme

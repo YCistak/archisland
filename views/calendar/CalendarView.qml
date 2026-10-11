@@ -2,10 +2,10 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// Takvim görünümü: ay ızgarası ve seçili günün ajandası. Veri
-// services/CalendarEvents.qml'den (host.calendar) gelir; etkinlik ekleme ve
-// silme yerinde yapılır (CalendarAgenda.qml). ←/→ gün, ↑/↓ hafta değiştirir,
-// Esc kapatır.
+// Calendar view: a month grid and the selected day's agenda. Data comes
+// from services/CalendarEvents.qml (host.calendar); events are added and
+// removed in place (CalendarAgenda.qml). ←/→ changes the day, ↑/↓ the week,
+// Esc closes.
 ColumnLayout {
   id: cal
   required property var host
@@ -35,7 +35,7 @@ ColumnLayout {
     displayMonth = today.getMonth()
     selectedDay = today.getDate()
   }
-  // Gün ya da ay kaydırma; ay sınırı aşılırsa ay da değişir.
+  // Move by days or months; crossing a month boundary changes the month too.
   function moveDays(delta) {
     var d = new Date(displayYear, displayMonth, selectedDay + delta)
     displayYear = d.getFullYear()
@@ -49,7 +49,7 @@ ColumnLayout {
     selectedDay = 1
   }
 
-  // Pazartesiyle başlayan 6 haftalık ızgara (42 hücre).
+  // A 6-week grid starting on Monday (42 cells).
   readonly property var cells: {
     var first = new Date(displayYear, displayMonth, 1)
     var offset = (first.getDay() + 6) % 7
@@ -84,7 +84,7 @@ ColumnLayout {
 
   spacing: 12
 
-  // ---------- Başlık ----------
+  // ---------- Header ----------
 
   RowLayout {
     Layout.fillWidth: true
@@ -107,7 +107,7 @@ ColumnLayout {
     }
   }
 
-  // ---------- Ay ızgarası ----------
+  // ---------- Month grid ----------
 
   Grid {
     id: grid
@@ -180,7 +180,7 @@ ColumnLayout {
     }
   }
 
-  // ---------- Seçili günün ajandası ----------
+  // ---------- Selected day's agenda ----------
 
   CalendarAgenda {
     id: agenda

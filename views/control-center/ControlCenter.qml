@@ -87,7 +87,7 @@ ColumnLayout {
         onClicked: cc.editMode = !cc.editMode
       }
     }
-    // Takvim ve geliştirici görünümleri; modülleri kapalıysa gizli.
+    // Calendar and developer views; hidden when their modules are off.
     Rectangle {
       visible: cc.host.viewAllowed("calendar")
       Layout.preferredWidth: 32

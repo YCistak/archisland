@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import "../../components"
 
-// Geliştirici görünümü: AI kota, Docker, portlar ve GitHub PR'ları. Her
-// bölüm kendi modülüne bağlıdır (Ayarlar → Modüller); sekmeler yalnız açık
-// modülleri gösterir. ←/→ (ya da Tab) sekme değiştirir, Esc kapatır.
+// Developer view: AI quota, Docker, ports and GitHub PRs. Each section is
+// tied to its own module (Settings → Modules); the tabs show only enabled
+// modules. ←/→ (or Tab) switches tabs, Esc closes.
 ColumnLayout {
   id: dev
   required property var host
@@ -36,7 +36,7 @@ ColumnLayout {
 
   onActiveChanged: {
     if (!active) return
-    // Canlı etkinlikten açıldıysa istenen sekme (ör. kota uyarısı → "ai").
+    // The requested tab if opened from a live activity (e.g. quota alert → "ai").
     if (host.devTab !== "") { tab = host.devTab; host.devTab = "" }
     Qt.callLater(function() { dev.forceActiveFocus() })
   }

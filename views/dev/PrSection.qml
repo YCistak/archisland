@@ -3,15 +3,15 @@ import QtQuick.Layouts
 import Quickshell.Io
 import "../../components"
 
-// githubPrs modülü: island.json'daki devRepos depolarının pull request'leri.
-// Depo seç, açık/tümü süz, daldan yeni PR aç, birleştir (merge) ya da reddet.
+// githubPrs module: pull requests of the devRepos repositories in island.json.
+// Pick a repository, filter open/all, open a new PR from a branch, merge or close.
 ColumnLayout {
   id: pr
   required property var stats
   property bool active: false
   readonly property var theme: stats.host.theme
 
-  // Depolar: "sahip/depo" biçimindekiler.
+  // Repositories: entries of the form "owner/repo".
   readonly property var repos: {
     var list = stats.host.settings.devRepos
     var out = []
@@ -41,7 +41,7 @@ ColumnLayout {
     branchProc.command = stats.script("gh-pr.sh", ["branches", repo])
     branchProc.running = true
   }
-  // gh eylemi bitince liste tazelenir.
+  // The list refreshes when a gh action finishes.
   function act(args) {
     actionProc.command = stats.script("gh-pr.sh", args)
     actionProc.running = true
@@ -85,7 +85,7 @@ ColumnLayout {
 
   spacing: 8
 
-  // ---------- Depo seçici ----------
+  // ---------- Repository picker ----------
 
   RowLayout {
     Layout.fillWidth: true
@@ -127,7 +127,7 @@ ColumnLayout {
     }
   }
 
-  // ---------- Süzgeç ----------
+  // ---------- Filter ----------
 
   RowLayout {
     Layout.fillWidth: true

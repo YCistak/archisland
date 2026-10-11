@@ -121,8 +121,8 @@ Item {
     TrayList { host: views.host; active: traySurface.active; anchors.fill: parent }
   }
 
-  // Takvim (calendar modülü) ve geliştirici görünümü (aiQuota, githubPrs,
-  // devPorts, docker modülleri).
+  // Calendar (calendar module) and developer view (aiQuota, githubPrs,
+  // devPorts, docker modules).
   Surface {
     id: calendarSurface
     host: views.host
