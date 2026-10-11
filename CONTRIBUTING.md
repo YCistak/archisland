@@ -61,7 +61,10 @@ Breaking changes use `!` (`feat(settings)!: ...`) or a `BREAKING CHANGE:` footer
 
 Every commit must be signed off, certifying that you wrote the change or have the
 right to submit it under the project's license
-(<https://developercertificate.org/>):
+(<https://developercertificate.org/>). The project is licensed under
+GPL-3.0-only (SPDX: `GPL-3.0-only`); by contributing, you agree that your
+contributions are licensed under the same terms. Third-party MIT notices are
+preserved in `THIRD_PARTY_NOTICES.md` and `core/LICENSE`:
 
 ```sh
 git commit -s -m "fix(island): correct collapse timing"
