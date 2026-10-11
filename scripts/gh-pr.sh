@@ -4,7 +4,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH"
 cmd="${1:-summary}"
 repo="${2:-}"
 
-# GitHub kullanıcı adı: gh'nin oturum açtığı hesap (oturum boyunca önbellekte tutulur).
+# GitHub user name: the account gh is logged in with (cached for the session).
 gh_owner() {
   local cache="${XDG_RUNTIME_DIR:-/tmp}/archisland-gh-owner"
   if [[ ! -s $cache ]]; then
@@ -13,7 +13,7 @@ gh_owner() {
   cat "$cache"
 }
 
-# summary dışındaki komutlar bir depo ister: "sahip/depo"
+# Commands other than summary need a repository: "owner/repo"
 if [[ $cmd != summary && -z $repo ]]; then
   echo '[]'
   exit 0
@@ -97,7 +97,7 @@ case "$cmd" in
       echo '{"success":false,"error":"Branch and title not specified"}'
       exit 1
     fi
-    # Hedef dal boşsa gh deponun varsayılan dalını kullanır.
+    # If the target branch is empty, gh uses the repository's default branch.
     base_args=()
     [[ -n $base_branch ]] && base_args=(--base "$base_branch")
     out=$(gh pr create -R "$repo" --head "$head_branch" "${base_args[@]}" --title "$title" --body "$body" 2>&1)
