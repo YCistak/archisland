@@ -144,6 +144,7 @@ json_birlestir() {
 # Claude Code ve Codex: olay → [{matcher?, hooks: [...]}]. Önce bizim eski
 # girdilerimiz (ajan-kanca.sh içeren) çıkarılır, sonra yenisi eklenir;
 # başka araçların kancalarına dokunulmaz.
+# shellcheck disable=SC2016 # jq program, not shell: $vars must stay literal
 OLAY_SUZGECI='
   def bizim: (.hooks // []) | any((.command // "") | contains("ajan-kanca.sh"));
   .hooks = (.hooks // {})
@@ -157,6 +158,7 @@ if [[ $AJAN_KANCALARI == true ]]; then
   fi
   # Antigravity CLI (agy): ~/.gemini/config/hooks.json, adlandırılmış gruplar.
   if command -v agy >/dev/null 2>&1 && [[ -d $HOME/.gemini ]]; then
+    # shellcheck disable=SC2016 # jq program, not shell: $ek must stay literal
     json_birlestir "$HOME/.gemini/config/hooks.json" "$HERE/hooks/agy-hooks.json" '. + $ek[0]'
   fi
 fi
